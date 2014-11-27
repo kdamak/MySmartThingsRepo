@@ -6,14 +6,14 @@
  metadata {
 
 
-	definition (name: "My PSM01 Sensor - Crawl Space Entry", namespace: "jscgs350", author: "SmartThings/Paul Spee") {
+	definition (name: "My PSM01 Sensor - Kitchen Refrigerator", namespace: "jscgs350", author: "SmartThings/Paul Spee") {
 		capability "Contact Sensor"
 		capability "Temperature Measurement"
 		capability "Illuminance Measurement"
 		capability "Configuration"
 		capability "Sensor"
 		capability "Battery"
-        capability "Refresh"
+        	capability "Refresh"
 		capability "Polling"
 
 		fingerprint deviceId: "0x2001", inClusters: "0x30,0x31,0x80,0x84,0x70,0x85,0x72,0x86"
@@ -21,10 +21,15 @@
 
 	tiles {
 
+//		standardTile("contact", "device.contact", width: 2, height: 2) {
+//            state "close", label:'closed', icon:"st.contact.contact.closed", backgroundColor:"#79b821"
+//            state "open", label:'open', icon:"st.contact.contact.open", backgroundColor:"#ffa81e"
+//        }
 		standardTile("contact", "device.contact", width: 2, height: 2) {
-            state "close", label:'closed', icon:"st.contact.contact.closed", backgroundColor:"#79b821"
-            state "open", label:'open', icon:"st.contact.contact.open", backgroundColor:"#ffa81e"
-        }
+			state "close", label: 'Frig Closed', icon: "st.fridge.fridge-closed", backgroundColor: "#ffffff"
+			state "open", label: 'Frig Open', icon: "st.fridge.fridge-open", backgroundColor: "#ffa81e"
+		}
+
 
 		valueTile("temperature", "device.temperature", inactiveLabel: false) {
 			state "temperature", label:'${currentValue}°',
@@ -49,6 +54,10 @@
         
 		standardTile("configure", "device.configure", inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
+		}
+
+		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+			state "default", action:"polling.poll", icon:"st.secondary.refresh"
 		}
 
 		main(["contact", "temperature", "illuminance"])
@@ -160,11 +169,12 @@ def configure() {
     
 	delayBetween([
 		
-		zwave.configurationV1.configurationSet(parameterNumber: 10, size: 1, scaledConfigurationValue: 4).format(), // Auto report Battery time 1-127
-		zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, scaledConfigurationValue: 2).format(), // Auto report Door/Window state time 1-127
-		zwave.configurationV1.configurationSet(parameterNumber: 12, size: 1, scaledConfigurationValue: 2).format(), // Auto report Illumination time 1-127
-        zwave.configurationV1.configurationSet(parameterNumber: 13, size: 1, scaledConfigurationValue: 2).format(), // Auto report Temperature time 1-127
-        zwave.wakeUpV1.wakeUpIntervalSet(seconds: 1 * 3600, nodeid:zwaveHubNodeId).format(),						// Wake up every hour
+        //1 tick = 30 minutes
+		zwave.configurationV1.configurationSet(parameterNumber: 10, size: 1, scaledConfigurationValue: 4).format(), // Auto report Battery time 1-127, default 12
+		zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, scaledConfigurationValue: 2).format(), // Auto report Door/Window state time 1-127, default 12
+		zwave.configurationV1.configurationSet(parameterNumber: 12, size: 1, scaledConfigurationValue: 2).format(), // Auto report Illumination time 1-127, default 12
+        	zwave.configurationV1.configurationSet(parameterNumber: 13, size: 1, scaledConfigurationValue: 2).format(), // Auto report Temperature time 1-127, default 12
+        	zwave.wakeUpV1.wakeUpIntervalSet(seconds: 1 * 3600, nodeid:zwaveHubNodeId).format(),						// Wake up every hour
 
     ])
 }
