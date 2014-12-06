@@ -6,6 +6,7 @@ metadata {
         capability "Switch"
         capability "Contact Sensor"
         capability "Configuration"
+        attribute "power", "string"
     }
 
     // UI tile definitions
