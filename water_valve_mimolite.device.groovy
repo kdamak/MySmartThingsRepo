@@ -1,6 +1,6 @@
 metadata {
     // Automatically generated. Make future change here.
-    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "@jr0, jscgs350") {
+    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "jsconst@gmail.com") {
         capability "Polling"
         capability "Refresh"
         capability "Switch"
@@ -16,8 +16,8 @@ metadata {
             state "on", label: 'Actuate', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#e86d13"
         }
         standardTile("contact", "device.contact", inactiveLabel: false) {
-            state "open", label: '${name}', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
-            state "closed", label: '${name}', icon: "st.valves.water.closed", backgroundColor: "#e86d13"
+            state "open", label: 'Flowing', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
+            state "closed", label: 'Closed', icon: "st.valves.water.closed", backgroundColor: "#e86d13"
         }
         standardTile("power", "device.power", inactiveLabel: false) {
         	state "dead", label: 'OFF', backgroundColor: "#ffa81e", icon:"st.switches.switch.off"
