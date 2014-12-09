@@ -8,7 +8,7 @@
 // for the UI
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Ecolink Contact Sensor - Window", namespace: "jscgs350", author: "jsconst@gmail.com") {
+	definition (name: "My Ecolink Contact Sensor - Window", namespace: "jscgs350", author: "jscgs350") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Battery"
