@@ -3,7 +3,7 @@
  *
 */
 metadata {
-	definition (name: "My MIMOlite - Front Doorbell", namespace: "jscgs350", author: "jsconst@gmail.com") {
+	definition (name: "My MIMOlite - Front Doorbell", namespace: "jscgs350", author: "jscgs350") {
     	capability "Contact Sensor"	
 	capability "Refresh"
         capability "Configuration"
