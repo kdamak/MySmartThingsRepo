@@ -20,13 +20,13 @@
  *
  *  Change 1:	2014-10-10 (wackford)
  *				Added setLevel event so subscriptions to the event will work
- *  Change 2:	2014-12-10 (Sticks18)
+ *  Change 2:	2014-12-10 (jscgs350 using Sticks18's code and effort!)
  *				Modified parse section to properly identify bulb status in the app when manually turned on by a physical switch
  *
  *
  */
 metadata {
-	definition (name: "My GE Link Bulb", namespace: "smartthings", author: "smartthings") {
+	definition (name: "My GE Link Bulb", namespace: "jscgs350", author: "smartthings") {
 	
     	capability "Actuator"
         capability "Configuration"
@@ -41,7 +41,7 @@ metadata {
 
 	// UI tile definitions
 	tiles {
-		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
+		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
 			state "off", label: '${name}', action: "switch.on", icon: "st.switches.light.off", backgroundColor: "#ffffff"
 			state "on", label: '${name}', action: "switch.off", icon: "st.switches.light.on", backgroundColor: "#79b821"
 		}
