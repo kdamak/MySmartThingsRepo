@@ -22,6 +22,8 @@
  *				Added setLevel event so subscriptions to the event will work
  *  Change 2:	2014-12-10 (jscgs350 using Sticks18's code and effort!)
  *				Modified parse section to properly identify bulb status in the app when manually turned on by a physical switch
+ *  Change 3:	2014-12-12 (jscgs350, Sticks18's)
+ *				Modified to ensure dimming was smoother, and added fix for dimming below 7
  *
  *
  */
@@ -141,8 +143,7 @@ def refresh() {
 }
 
 def setLevel(value) {
-	log.trace "setLevel($value)"
-	def cmds = []
+    def cmds = []
 
 	if (value == 0) {
 		sendEvent(name: "switch", value: "off")
@@ -152,12 +153,13 @@ def setLevel(value) {
 		sendEvent(name: "switch", value: "on")
 	}
 
-	sendEvent(name: "level", value: value)
-	def level = new BigInteger(Math.round(value * 255 / 100).toString()).toString(16)
-	cmds << "st cmd 0x${device.deviceNetworkId} 1 8 4 {${level} 1500}"
+    sendEvent(name: "level", value: value)
+    value = (value * 255 / 100)
+    def level = hex(value);
+    cmds << "st cmd 0x${device.deviceNetworkId} 1 8 4 {${level} 1500}"
 
-	log.debug cmds
-	cmds
+    log.debug cmds
+    cmds
 }
 
 def configure() {
@@ -179,8 +181,6 @@ def configure() {
 	]
     return configCmds + refresh() // send refresh cmds as part of config
 }
-
-
 
 private hex(value, width=2) {
 	def s = new BigInteger(Math.round(value).toString()).toString(16)
