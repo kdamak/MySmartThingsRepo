@@ -24,12 +24,14 @@
  *				Modified parse section to properly identify bulb status in the app when manually turned on by a physical switch
  *  Change 3:	2014-12-12 (jscgs350, Sticks18's)
  *				Modified to ensure dimming was smoother, and added fix for dimming below 7
+ *	Change 4:	2014-12-14 (Sticks18)
+ *				Modified to ignore unnecessary level change responses to prevent level skips
  *
  *
  */
 metadata {
-	definition (name: "My GE Link Bulb", namespace: "jscgs350", author: "smartthings") {
-	
+	definition (name: "My GE Link Bulb v2", namespace: "sticks18", author: "smartthings") {
+
     	capability "Actuator"
         capability "Configuration"
         capability "Refresh"
@@ -56,7 +58,7 @@ metadata {
 		valueTile("level", "device.level", inactiveLabel: false, decoration: "flat") {
 			state "level", label: 'Level ${currentValue}%'
 		}
-		
+
 		main(["switch"])
 		details(["switch", "level", "levelSliderControl", "refresh"])
 	}
@@ -65,8 +67,9 @@ metadata {
 // Parse incoming device messages to generate events
 def parse(String description) {
 	log.trace description
+    def msg = zigbee.parse(description)
+
 	if (description?.startsWith("catchall:")) {
-		def msg = zigbee.parse(description)
 		log.trace msg
 		log.trace "data: $msg.data"
 
@@ -105,15 +108,40 @@ def parse(String description) {
                 break
         }
     }
-    
+
     if (description?.startsWith("read attr")) {
-    	log.debug description[-2..-1]
-        def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
-        
-		sendEvent( name: "level", value: i )
-        sendEvent( name: "switch.setLevel", value: i) //added to help subscribers
+
+        log.trace description[27..28]
+        log.trace description[-2..-1]
+
+    	if (description[27..28] == "0A") {
+
+        	log.debug description[-2..-1]
+        	def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
+			sendEvent( name: "level", value: i )
+        	sendEvent( name: "switch.setLevel", value: i) //added to help subscribers
+
+    	} 
+
+    	else {
+
+    		if (description[-2..-1] == "00" && state.trigger == "setLevel") {
+        		log.debug description[-2..-1]
+        		def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
+				sendEvent( name: "level", value: i )
+        		sendEvent( name: "switch.setLevel", value: i) //added to help subscribers   
+        	}    
+
+        	if (description[-2..-1] == state.lvl) {
+        		log.debug description[-2..-1]
+        		def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
+				sendEvent( name: "level", value: i )
+        		sendEvent( name: "switch.setLevel", value: i) //added to help subscribers
+        	}    
+
+    	}
     }
-    
+
 }
 
 def poll() {
@@ -124,13 +152,19 @@ def poll() {
 }
 
 def on() {
-	log.debug "on()"
+	state.lvl = "00"
+    state.trigger = "on/off"
+
+    log.debug "on()"
 	sendEvent(name: "switch", value: "on")
 	"st cmd 0x${device.deviceNetworkId} 1 6 1 {}"
 }
 
 def off() {
-	log.debug "off()"
+	state.lvl = "00"
+    state.trigger = "on/off"
+
+    log.debug "off()"
 	sendEvent(name: "switch", value: "off")
 	"st cmd 0x${device.deviceNetworkId} 1 6 0 {}"
 }
@@ -143,6 +177,7 @@ def refresh() {
 }
 
 def setLevel(value) {
+
     def cmds = []
 
 	if (value == 0) {
@@ -156,6 +191,10 @@ def setLevel(value) {
     sendEvent(name: "level", value: value)
     value = (value * 255 / 100)
     def level = hex(value);
+
+    state.trigger = "setLevel"
+    state.lvl = "${level}"
+
     cmds << "st cmd 0x${device.deviceNetworkId} 1 8 4 {${level} 1500}"
 
     log.debug cmds
@@ -167,15 +206,15 @@ def configure() {
 	String zigbeeId = swapEndianHex(device.hub.zigbeeId)
 	log.debug "Confuguring Reporting and Bindings."
 	def configCmds = [	
-  
+
         //Switch Reporting
         "zcl global send-me-a-report 6 0 0x10 0 3600 {01}", "delay 500",
         "send 0x${device.deviceNetworkId} 1 1", "delay 1000",
-        
+
         //Level Control Reporting
         "zcl global send-me-a-report 8 0 0x20 5 3600 {0010}", "delay 200",
         "send 0x${device.deviceNetworkId} 1 1", "delay 1500",
-        
+
         "zdo bind 0x${device.deviceNetworkId} 1 1 6 {${device.zigbeeId}} {}", "delay 1000",
 		"zdo bind 0x${device.deviceNetworkId} 1 1 8 {${device.zigbeeId}} {}", "delay 500",
 	]
