@@ -30,7 +30,7 @@
  *
  */
 metadata {
-	definition (name: "My GE Link Bulb v2", namespace: "sticks18", author: "smartthings") {
+	definition (name: "My GE Link Bulb v2", namespace: "jscgs350", author: "smartthings") {
 
     	capability "Actuator"
         capability "Configuration"
