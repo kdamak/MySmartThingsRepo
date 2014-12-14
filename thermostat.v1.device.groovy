@@ -23,7 +23,7 @@
 */
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Thermostat - 1st Floor", namespace: "jscgs350", author: "jscgs350") {
+	definition (name: "My Thermostat v1 - 1st Floor", namespace: "jscgs350", author: "jscgs350") {
 		capability "Refresh"
 		capability "Temperature Measurement"
 		capability "Thermostat"
