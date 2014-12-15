@@ -24,8 +24,10 @@
  *				Modified parse section to properly identify bulb status in the app when manually turned on by a physical switch
  *  Change 3:	2014-12-12 (jscgs350, Sticks18's)
  *				Modified to ensure dimming was smoother, and added fix for dimming below 7
- *	Change 4:	2014-12-14 (Sticks18)
+ *	Change 4:	2014-12-14 Part 1 (Sticks18)
  *				Modified to ignore unnecessary level change responses to prevent level skips
+ *	Change 5:	2014-12-14 Part 2 (Sticks18, jscgs350)
+ *				Modified to clean up trace&debug logging, added new code from @sticks18 for parsing "on/off" to determine if the bulb is manually turned on and immediately update the app
  *
  *
  */
@@ -67,14 +69,28 @@ metadata {
 // Parse incoming device messages to generate events
 def parse(String description) {
 	log.trace description
+    
+    if (description?.startsWith("on/off:")) {    
+		log.debug "The bulb was sent a command to do something just now..."
+		if (description[-1] == "1") {
+        	def result = createEvent(name: "switch", value: "on")
+            log.debug "On command was sent maybe from manually turning on? : Parse returned ${result?.descriptionText}"
+            return result
+        } else if (description[-1] == "0") {
+        	def result = createEvent(name: "switch", value: "off")
+            log.debug "Off command was sent : Parse returned ${result?.descriptionText}"
+            return result
+        }
+    }
+    
     def msg = zigbee.parse(description)
 
 	if (description?.startsWith("catchall:")) {
-		log.trace msg
-		log.trace "data: $msg.data"
+		// log.trace msg
+		// log.trace "data: $msg.data"
 
         def x = description[-4..-1]
-        log.debug x
+        // log.debug x
 
         switch (x) 
         {
@@ -82,28 +98,28 @@ def parse(String description) {
         	case "0000":
 
             	def result = createEvent(name: "switch", value: "off")
-            	log.debug "Parse returned ${result?.descriptionText}"
+            	log.debug "${result?.descriptionText}"
            		return result
                 break
 
             case "1000":
 
             	def result = createEvent(name: "switch", value: "off")
-            	log.debug "Parse returned ${result?.descriptionText}"
+            	log.debug "${result?.descriptionText}"
            		return result
                 break
 
             case "0100":
 
             	def result = createEvent(name: "switch", value: "on")
-            	log.debug "Parse returned ${result?.descriptionText}"
+            	log.debug "${result?.descriptionText}"
            		return result
                 break
 
             case "1001":
 
             	def result = createEvent(name: "switch", value: "on")
-            	log.debug "Parse returned ${result?.descriptionText}"
+            	log.debug "${result?.descriptionText}"
            		return result
                 break
         }
@@ -111,12 +127,12 @@ def parse(String description) {
 
     if (description?.startsWith("read attr")) {
 
-        log.trace description[27..28]
-        log.trace description[-2..-1]
+        // log.trace description[27..28]
+        // log.trace description[-2..-1]
 
     	if (description[27..28] == "0A") {
 
-        	log.debug description[-2..-1]
+        	// log.debug description[-2..-1]
         	def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
 			sendEvent( name: "level", value: i )
         	sendEvent( name: "switch.setLevel", value: i) //added to help subscribers
@@ -126,14 +142,14 @@ def parse(String description) {
     	else {
 
     		if (description[-2..-1] == "00" && state.trigger == "setLevel") {
-        		log.debug description[-2..-1]
+        		// log.debug description[-2..-1]
         		def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
 				sendEvent( name: "level", value: i )
         		sendEvent( name: "switch.setLevel", value: i) //added to help subscribers   
         	}    
 
         	if (description[-2..-1] == state.lvl) {
-        		log.debug description[-2..-1]
+        		// log.debug description[-2..-1]
         		def i = Math.round(convertHexToInt(description[-2..-1]) / 256 * 100 )
 				sendEvent( name: "level", value: i )
         		sendEvent( name: "switch.setLevel", value: i) //added to help subscribers
@@ -155,7 +171,7 @@ def on() {
 	state.lvl = "00"
     state.trigger = "on/off"
 
-    log.debug "on()"
+    // log.debug "on()"
 	sendEvent(name: "switch", value: "on")
 	"st cmd 0x${device.deviceNetworkId} 1 6 1 {}"
 }
@@ -164,7 +180,7 @@ def off() {
 	state.lvl = "00"
     state.trigger = "on/off"
 
-    log.debug "off()"
+    // log.debug "off()"
 	sendEvent(name: "switch", value: "off")
 	"st cmd 0x${device.deviceNetworkId} 1 6 0 {}"
 }
