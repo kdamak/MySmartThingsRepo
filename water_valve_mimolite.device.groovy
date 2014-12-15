@@ -1,27 +1,30 @@
 metadata {
     // Automatically generated. Make future change here.
-    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "@jr0, jscgs350") {
-        capability "Alarm"
-        capability "Polling"
+    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "jsconst@gmail.com") {
+		capability "Alarm"
+		capability "Polling"
         capability "Refresh"
         capability "Switch"
         capability "Contact Sensor"
         capability "Configuration"
         attribute "power", "string"
-    }
+
+}
 
     // UI tile definitions
     tiles {
         standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
-            state "off", label: 'Actuate', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0"
-            state "on", label: 'Actuate', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#e86d13"
-        }
+            state "off", label: 'Flowing', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
+            state "on", label: 'Closed', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
+			state "closingvalve", label:'Closing', icon:"st.valves.water.closed", backgroundColor:"#ffd700"
+			state "openingvalve", label:'Opening', icon:"st.valves.water.open", backgroundColor:"#ffd700"
+}
         standardTile("contact", "device.contact", inactiveLabel: false) {
             state "open", label: 'Flowing', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
-            state "closed", label: 'Closed', icon: "st.valves.water.closed", backgroundColor: "#e86d13"
+            state "closed", label: 'Closed', icon: "st.valves.water.closed", backgroundColor: "#ff0000"
         }
         standardTile("power", "device.power", inactiveLabel: false) {
-        	state "dead", label: 'OFF', backgroundColor: "#ffa81e", icon:"st.switches.switch.off"
+        	state "dead", label: 'OFF', backgroundColor: "#ff0000", icon:"st.switches.switch.off"
         	state "alive", label: 'ON', backgroundColor: "#79b821", icon:"st.switches.switch.on"
         }
         standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
