@@ -1,6 +1,6 @@
 metadata {
     // Automatically generated. Make future change here.
-    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "jscgs350") {
+    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "jsconst@gmail.com") {
 		capability "Alarm"
 		capability "Polling"
         capability "Refresh"
@@ -14,8 +14,8 @@ metadata {
     // UI tile definitions
     tiles {
         standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
-            state "off", label: 'Actuate', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
-            state "on", label: 'Actuate', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
+            state "off", label: 'Close Valve', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
+            state "on", label: 'Open Valve', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
 			state "closingvalve", label:'Closing', icon:"st.valves.water.closed", backgroundColor:"#ffd700"
 			state "openingvalve", label:'Opening', icon:"st.valves.water.open", backgroundColor:"#ffd700"
 }
@@ -115,21 +115,32 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 }
 
 def off() {
-    delayBetween([
+	log.debug "Closing Main Water Valve per user request"
+	delayBetween([
+        zwave.basicV1.basicSet(value: 0xFF).format(),
+        zwave.switchBinaryV1.switchBinaryGet().format()
+    ])
+}
+
+def both() {
+	log.debug "Closing Main Water Valve due to an alarm condition"
+	delayBetween([
         zwave.basicV1.basicSet(value: 0xFF).format(),
         zwave.switchBinaryV1.switchBinaryGet().format()
     ])
 }
 
 def on() {
-    delayBetween([
+	log.debug "Opening Main Water Valve per user request"
+	delayBetween([
         zwave.basicV1.basicSet(value: 0x00).format(),
         zwave.switchBinaryV1.switchBinaryGet().format()
     ])
 }
 
 def poll() {
-    zwave.switchBinaryV1.switchBinaryGet().format()
+	log.debug "executing 'poll'"
+	zwave.switchBinaryV1.switchBinaryGet().format()
 }
 
 def refresh() {
