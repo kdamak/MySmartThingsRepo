@@ -71,7 +71,6 @@ def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
     [name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
 }
 
-
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd)
 {
     sensorValueEvent(cmd.value)
