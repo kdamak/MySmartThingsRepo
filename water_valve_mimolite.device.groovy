@@ -142,7 +142,7 @@ def refresh() {
 def configure() {
 	log.debug "executing 'configure'"
 	def cmd = delayBetween([
-        zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
+        zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [1]).format(), // momentary relay disable=0 (default)
         zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:zwaveHubNodeId).format(),	//subscribe to power alarm
 	],100)
 }
