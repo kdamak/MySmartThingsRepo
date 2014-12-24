@@ -139,19 +139,26 @@ def on() {
 }
 
 def poll() {
-	log.debug "executing 'poll'"
-	zwave.switchBinaryV1.switchBinaryGet().format()
-}
-
-def refresh() {
-	log.debug "executing 'refresh'"
-    delayBetween([	
-        zwave.sensorMultilevelV3.sensorMultilevelGet().format()
+	log.debug "Executing Poll for Main Water Valve"
+	delayBetween([
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+		zwave.alarmV1.alarmGet().format() 
 	],100)
 }
 
+def refresh() {
+	log.debug "Executing Refresh for Main Water Valve per user request"
+	delayBetween([
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+		zwave.alarmV1.alarmGet().format() 
+	],100)
+}
+
+
 def configure() {
-	log.debug "executing 'configure'"
+	log.debug "Executing Configure for Main Water Valve per user request"
 	def cmd = delayBetween([
         zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
         zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:zwaveHubNodeId).format(),	//subscribe to power alarm
