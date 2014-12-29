@@ -8,7 +8,7 @@
 // for the UI
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Ecolink Contact Sensor - Window", namespace: "jscgs350", author: "jscgs350") {
+	definition (name: "My Ecolink Contact Sensor - Window", namespace: "jscgs350", author: "jsconst@gmail.com") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Battery"
@@ -27,8 +27,8 @@ metadata {
 	// UI tile definitions
 	tiles {
 		standardTile("contact", "device.contact", width: 2, height: 2) {
-			state "open", label: 'Window\n${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffa81e"
-			state "closed", label: 'Window\n${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffffff"
+			state "open", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffa81e"
+			state "closed", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffffff"
 		}
         valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
 			state "battery", label:'${currentValue}% battery', unit:""
