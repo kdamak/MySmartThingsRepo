@@ -8,11 +8,10 @@
 // for the UI
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Ecolink Contact Sensor - Window", namespace: "jscgs350", author: "jsconst@gmail.com") {
+	definition (name: "My Ecolink Contact Sensor - Window", namespace: "jscgs350", author: "SmartThings") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Battery"
-		capability "Polling"
 
 		fingerprint deviceId: "0x2001", inClusters: "0x30,0x80,0x84,0x70,0x85,0x86,0x72"
 	}
@@ -62,8 +61,10 @@ def parse(String description) {
 
 def sensorValueEvent(value) {
 	if (value) {
+    	log.debug "$device.displayName is open"
 		createEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
 	} else {
+    	log.debug "$device.displayName is closed"
 		createEvent(name: "contact", value: "closed", descriptionText: "$device.displayName is closed")
 	}
 }
@@ -164,6 +165,13 @@ def zwaveEvent(physicalgraph.zwave.commands.manufacturerspecificv2.ManufacturerS
 	retypeBasedOnMSR()
 
 	result << createEvent(descriptionText: "$device.displayName MSR: $msr", isStateChange: false)
+
+	if (msr == "011A-0601-0901") {  // Enerwave motion doesn't always get the associationSet that the hub sends on join
+		result << response(zwave.associationV1.associationSet(groupingIdentifier:1, nodeId:zwaveHubNodeId))
+	} else if (!device.currentState("battery")) {
+		result << response(zwave.batteryV1.batteryGet())
+	}
+
 	result
 }
 
@@ -181,6 +189,7 @@ def retypeBasedOnMSR() {
 		case "014A-0001-0001":  // Ecolink motion
 		case "0060-0001-0002":  // Everspring SP814
 		case "0060-0001-0003":  // Everspring HSP02
+		case "011A-0601-0901":  // Enerwave ZWN-BPC
 			log.debug("Changing device type to Z-Wave Motion Sensor")
 			setDeviceType("Z-Wave Motion Sensor")
 			break
