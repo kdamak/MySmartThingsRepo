@@ -49,10 +49,8 @@ def parse(String description) {
 
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
-        log.debug "description is: ${power}"
     } else {
     	sendEvent(name: "power", value: "alive")
-        log.debug "description is: ${power}"
     }
 
 	if (cmd) {
@@ -64,10 +62,10 @@ def parse(String description) {
 
 def sensorValueEvent(Short value) {
     if (value) {
-    	log.debug "$device.displayName is open"
+    	log.debug "$device.displayName is now open"
 		createEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
     } else {
-        log.debug "$device.displayName is closed"
+        log.debug "$device.displayName is now closed"
         createEvent(name: "contact", value: "closed", descriptionText: "$device.displayName is closed")
     }
 }
