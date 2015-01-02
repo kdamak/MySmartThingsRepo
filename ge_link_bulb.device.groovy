@@ -28,6 +28,8 @@
  *				Modified to ignore unnecessary level change responses to prevent level skips
  *	Change 5:	2014-12-14 Part 2 (Sticks18, jscgs350)
  *				Modified to clean up trace&debug logging, added new code from @sticks18 for parsing "on/off" to determine if the bulb is manually turned on and immediately update the app
+ *	Change 6:	2015-01-02	(Sticks18)
+ *				Modified to allow dim rate in Preferences. Added ability to dim during On/Off commands and included this option in Preferences. Defaults are "Normal" and no dim for On/Off.
  *
  *
  */
@@ -64,6 +66,13 @@ metadata {
 		main(["switch"])
 		details(["switch", "level", "levelSliderControl", "refresh"])
 	}
+	
+	    preferences {
+        
+        	input("dimRate", "enum", title: "Dim Rate", options: ["Instant", "Normal", "Slow", "Very Slow"], defaultValue: "Normal", required: false, displayDuringSetup: true)
+            input("dimOnOff", "boolean", title: "Dim transition for On/Off commands?", required: false, displayDuringSetup: true)
+            
+    }
 }
 
 // Parse incoming device messages to generate events
@@ -163,8 +172,58 @@ def parse(String description) {
 def poll() {
 	[
 	"st rattr 0x${device.deviceNetworkId} 1 6 0", "delay 500",
-    "st rattr 0x${device.deviceNetworkId} 1 8 0"
+    "st rattr 0x${device.deviceNetworkId} 1 8 0", "delay 500",
+    "st wattr 0x${device.deviceNetworkId} 1 8 0x10 0x21 {${state.dOnOff}}"
     ]
+}
+
+def updated() {
+
+	state.dOnOff = "0000"
+    
+	if (dimRate) {
+
+		switch (dimRate) 
+        	{
+
+        		case "Instant":
+
+            		state.rate = "0000"
+                	if (dimOnOff) { state.dOnOff = "0000"}
+                    break
+
+            	case "Normal":
+
+            		state.rate = "1500"
+                    if (dimOnOff) { state.dOnOff = "0015"}
+                	break
+
+            	case "Slow":
+
+            		state.rate = "2500"
+                    if (dimOnOff) { state.dOnOff = "0025"}
+               		break
+                
+            	case "Very Slow":
+            
+            		state.rate = "3500"
+                    if (dimOnOff) { state.dOnOff = "0035"}
+                	break
+
+        	}
+    
+    }
+    
+    else {
+    
+    	state.rate = "1500"
+        state.dOnOff = "0000"
+        
+    }
+    
+    "st wattr 0x${device.deviceNetworkId} 1 8 0x10 0x21 {${state.dOnOff}}"
+
+
 }
 
 def on() {
@@ -188,7 +247,8 @@ def off() {
 def refresh() {
 	[
 	"st rattr 0x${device.deviceNetworkId} 1 6 0", "delay 500",
-    "st rattr 0x${device.deviceNetworkId} 1 8 0"
+    "st rattr 0x${device.deviceNetworkId} 1 8 0", "delay 500",
+    "st wattr 0x${device.deviceNetworkId} 1 8 0x10 0x21 {${state.dOnOff}}"
     ]
 }
 
@@ -198,7 +258,7 @@ def setLevel(value) {
 
 	if (value == 0) {
 		sendEvent(name: "switch", value: "off")
-		cmds << "st cmd 0x${device.deviceNetworkId} 1 8 0 {0000 0000}"
+		cmds << "st cmd 0x${device.deviceNetworkId} 1 8 0 {0000 ${state.rate}}"
 	}
 	else if (device.latestValue("switch") == "off") {
 		sendEvent(name: "switch", value: "on")
@@ -211,7 +271,12 @@ def setLevel(value) {
     state.trigger = "setLevel"
     state.lvl = "${level}"
 
-    cmds << "st cmd 0x${device.deviceNetworkId} 1 8 4 {${level} 1500}"
+    if (dimRate) {
+    	cmds << "st cmd 0x${device.deviceNetworkId} 1 8 4 {${level} ${state.rate}}"
+    }
+    else {   
+    	cmds << "st cmd 0x${device.deviceNetworkId} 1 8 4 {${level} 1500}"
+    }
 
     log.debug cmds
     cmds
