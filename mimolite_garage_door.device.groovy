@@ -1,7 +1,6 @@
 /**
  *  SmartSense Virtual Momentary Contact Switch, Better Momentary for the MIMOlite
  *
- *  Capabilities to enable: Alarm, Contact Sensor, Momentary, Polling, Refresh, Switch
  *
  *  Author: SmartThings, jsconst@gmail.com
  *  Date: 2013-03-07,2014-02-03, 2014-03-07
