@@ -20,8 +20,8 @@ metadata {
 	// tile definitions
 	tiles {
 		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
-			state "off", label: 'Push', action: "momentary.push", icon: "st.doors.garage.garage-closed", backgroundColor: "#ffffff"
-			state "on", label: 'Push', action: "switch.off", icon: "st.doors.garage.garage-closed", backgroundColor: "#53a7c0"
+			state "off", label: 'Actuate', action: "momentary.push", icon: "st.doors.garage.garage-closed", backgroundColor: "#ffffff"
+			state "on", label: 'Actuate', action: "switch.off", icon: "st.doors.garage.garage-closed", backgroundColor: "#53a7c0"
 		}
         standardTile("contact", "device.contact", inactiveLabel: false) {
             state "open", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e"
@@ -116,7 +116,7 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 }
 
 def push() {
-	log.debug "Executing PUSH command for garage car door"
+	log.debug "Executing Actuate command for garage car door"
 	def cmds = [
 		zwave.basicV1.basicSet(value: 0xFF).format(),
 		zwave.switchBinaryV1.switchBinaryGet().format(),
@@ -139,6 +139,7 @@ def poll() {
 	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+        zwave.basicV1.basicGet().format(),
 		zwave.alarmV1.alarmGet().format() 
 	],100)
 }
@@ -148,6 +149,7 @@ def refresh() {
 	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+        zwave.basicV1.basicGet().format(),
 		zwave.alarmV1.alarmGet().format() 
 	],100)
 }
