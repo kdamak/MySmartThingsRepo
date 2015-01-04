@@ -1,31 +1,35 @@
+/**
+ *  SmartSense Virtual Momentary Contact Switch, Better Momentary for the MIMOlite
+ *
+ *
+ *  Author: SmartThings, jscgs350
+ *  Date: 2013-03-07,2014-02-03, 2014-03-07
+ */
 metadata {
-    // Automatically generated. Make future change here.
-    definition (name: "My MIMOlite - Main Water Valve", namespace: "jscgs350", author: "jsc") {
-		capability "Alarm"
+	// Automatically generated. Make future change here.
+	definition (name: "My MIMOlite - Garage Car Door v2", namespace: "jscgs350", author: "jscgs350") {
+		capability "Refresh"
+		capability "Contact Sensor"
+		capability "Momentary"
 		capability "Polling"
-        capability "Refresh"
-        capability "Switch"
-        capability "Contact Sensor"
-        capability "Configuration"
+		capability "Switch"
         attribute "power", "string"
 
-}
+	}
 
-    // UI tile definitions
-    tiles {
-        standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
-            state "off", label: 'Close Valve', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
-            state "on", label: 'Open Valve', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
-			state "closingvalve", label:'Closing', icon:"st.valves.water.closed", backgroundColor:"#ffd700"
-			state "openingvalve", label:'Opening', icon:"st.valves.water.open", backgroundColor:"#ffd700"
-}
+	// tile definitions
+	tiles {
+		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
+			state "off", label: 'Actuate', action: "momentary.push", icon: "st.doors.garage.garage-closed", backgroundColor: "#ffffff"
+			state "on", label: 'Actuate', action: "switch.off", icon: "st.doors.garage.garage-closed", backgroundColor: "#53a7c0"
+		}
         standardTile("contact", "device.contact", inactiveLabel: false) {
-            state "open", label: 'Flowing', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
-            state "closed", label: 'Closed', icon: "st.valves.water.closed", backgroundColor: "#ff0000"
+            state "open", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e"
+            state "closed", label: 'Closed', icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821"
         }
         standardTile("power", "device.power", inactiveLabel: false) {
-        	state "dead", label: 'OFF', backgroundColor: "#ff0000", icon:"st.switches.switch.off"
-        	state "alive", label: 'ON', backgroundColor: "#79b821", icon:"st.switches.switch.on"
+        	state "dead", label: 'OFF', icon:"st.switches.switch.off", backgroundColor: "#ff0000"
+        	state "alive", label: 'ON', icon:"st.switches.switch.on", backgroundColor: "#79b821"
         }
         standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
             state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
@@ -44,45 +48,43 @@ def parse(String description) {
 
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
-        log.debug "description is: ${power}"
     } else {
     	sendEvent(name: "power", value: "alive")
-        log.debug "description is: ${power}"
     }
-
 
 	if (cmd) {
         result = createEvent(zwaveEvent(cmd))
     }
-    
-    log.debug "Parse returned ${result?.descriptionText}"
+//    log.debug "Parse returned ${result?.descriptionText}"
     return result
 }
 
 def sensorValueEvent(Short value) {
     if (value) {
-        createEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
+    	log.debug "$device.displayName is now open"
+		createEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
     } else {
+        log.debug "$device.displayName is now closed"
         createEvent(name: "contact", value: "closed", descriptionText: "$device.displayName is closed")
     }
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
-    [name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
+	[name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd)
 {
-    sensorValueEvent(cmd.value)
+	sensorValueEvent(cmd.value)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd) {
-    [name: "switch", value: cmd.value ? "on" : "off", type: "digital"]
+	[name: "switch", value: cmd.value ? "on" : "off", type: "digital"]
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.sensorbinaryv1.SensorBinaryReport cmd)
 {
-    sensorValueEvent(cmd.sensorValue)
+	sensorValueEvent(cmd.sensorValue)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.alarmv1.AlarmReport cmd)
@@ -109,57 +111,53 @@ def zwaveEvent(physicalgraph.zwave.commands.alarmv1.AlarmReport cmd)
 }
 
 def zwaveEvent(physicalgraph.zwave.Command cmd) {
-    // Handles all Z-Wave commands we aren't interested in
-    [:]
+	// Handles all Z-Wave commands we aren't interested in
+	[:]
 }
 
-def off() {
-	log.debug "Closing Main Water Valve per user request"
-	delayBetween([
-        zwave.basicV1.basicSet(value: 0xFF).format(),
-        zwave.switchBinaryV1.switchBinaryGet().format()
-    ])
-}
-
-def both() {
-	log.debug "Closing Main Water Valve due to an alarm condition"
-	delayBetween([
-        zwave.basicV1.basicSet(value: 0xFF).format(),
-        zwave.switchBinaryV1.switchBinaryGet().format()
-    ])
+def push() {
+	log.debug "Executing Actuate command for garage car door"
+	def cmds = [
+		zwave.basicV1.basicSet(value: 0xFF).format(),
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+	]
 }
 
 def on() {
-	log.debug "Opening Main Water Valve per user request"
-	delayBetween([
-        zwave.basicV1.basicSet(value: 0x00).format(),
-        zwave.switchBinaryV1.switchBinaryGet().format()
-    ])
+	push()
+}
+
+def off() {
+	[
+		zwave.basicV1.basicSet(value: 0x00).format(),
+		zwave.switchBinaryV1.switchBinaryGet().format()
+	]
 }
 
 def poll() {
-	log.debug "Executing Poll for Main Water Valve"
+	log.debug "Executing Poll for garage car door"
 	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+        zwave.basicV1.basicGet().format(),
 		zwave.alarmV1.alarmGet().format() 
 	],100)
 }
 
 def refresh() {
-	log.debug "Executing Refresh for Main Water Valve per user request"
+	log.debug "Executing Refresh for garage car door per user request"
 	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+        zwave.basicV1.basicGet().format(),
 		zwave.alarmV1.alarmGet().format() 
 	],100)
 }
 
-
 def configure() {
-	log.debug "Executing Configure for Main Water Valve per user request"
+	log.debug "Executing Configure for garage car door per user request"
 	def cmd = delayBetween([
-        zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
+//        zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
         zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:zwaveHubNodeId).format(),	//subscribe to power alarm
 	],100)
 }
