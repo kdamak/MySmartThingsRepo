@@ -7,7 +7,7 @@
  */
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My MIMOlite - Garage Car Door v2", namespace: "jscgs350", author: "jscgs350") {
+	definition (name: "My MIMOlite - Garage Car Door", namespace: "jscgs350", author: "jscgs350") {
 		capability "Refresh"
 		capability "Contact Sensor"
 		capability "Momentary"
