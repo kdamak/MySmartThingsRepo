@@ -1,5 +1,5 @@
 /**
- *  MIMOLite Doorbell
+ *  MIMOLite config and association code example
  *
 */
 metadata {
@@ -7,26 +7,9 @@ metadata {
     	capability "Contact Sensor"	
 	capability "Refresh"
         capability "Configuration"
-        //uncomment for switch
-        /*
         capability "Polling"
-        capability "Switch"
-        */
-	}
-	simulator {
-		// reply messages
-		reply "2001FF,delay 100,2502": "command: 2503, payload: FF"
-		reply "200100,delay 100,2502": "command: 2503, payload: 00"
+//        capability "Switch"
 
-		// status messages
-		status "open":  "command: 2001, payload: FF"
-		status "closed": "command: 2001, payload: 00"
-
-        //uncomment for switch
-        /*
-        status "on":  "command: 2003, payload: FF"
-		status "off": "command: 2003, payload: 00"
-        */
 	}
 
 	tiles {
