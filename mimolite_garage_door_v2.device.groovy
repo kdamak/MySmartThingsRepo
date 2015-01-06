@@ -1,8 +1,8 @@
 /**
- * MIMOlite garage door opener button, with power failure indicator.  Make sure to tap Configure, and
- * make sure to remove the jumper before including them molite to your hub.
-
- *  Author: Many ST community members
+ *  SmartSense Virtual Momentary Contact Switch, Better Momentary for the MIMOlite
+ *
+ *
+ *  Author: SmartThings, jscgs350
  *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
  */
 metadata {
@@ -143,7 +143,8 @@ def refresh() {
 def configure() {
 	log.debug "Executing Configure for garage car door per user request"
 	def cmd = delayBetween([
-//        zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
+        zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
         zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:zwaveHubNodeId).format(),	//subscribe to power alarm
 	],100)
+    log.debug "zwaveEvent ConfigurationReport: '${cmd}'"
 }
