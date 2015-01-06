@@ -1,6 +1,6 @@
 /**
- *  SmartSense Virtual Momentary Contact Switch, Better Momentary for the MIMOlite
- *
+ * MIMOlite garage door opener button, with power failure indicator.  Make sure to tap Configure, and
+ * make sure to remove the jumper before including them molite to your hub.
  *
  *  Author: SmartThings, jscgs350
  *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
