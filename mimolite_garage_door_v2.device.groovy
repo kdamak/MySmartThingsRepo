@@ -1,8 +1,8 @@
 /**
- *  SmartSense Virtual Momentary Contact Switch, Better Momentary for the MIMOlite
+ * MIMOlite device type for garage door button, including power failure indicator.  Be sure mimolite has jumper removed before
+ * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
- *
- *  Author: SmartThings, jscgs350
+ *  Author: Many ST community members
  *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
  */
 metadata {
