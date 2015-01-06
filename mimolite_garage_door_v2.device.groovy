@@ -1,8 +1,8 @@
 /**
  * MIMOlite garage door opener button, with power failure indicator.  Make sure to tap Configure, and
  * make sure to remove the jumper before including them molite to your hub.
- *
- *  Author: SmartThings, jscgs350
+
+ *  Author: Many ST community members
  *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
  */
 metadata {
@@ -14,6 +14,8 @@ metadata {
 		capability "Polling"
 		capability "Switch"
         attribute "power", "string"
+
+		fingerprint deviceId:"0x1000", inClusters:"0x72, 0x86, 0x71, 0x30, 0x31, 0x35, 0x70, 0x85, 0x25, 0x03"
 
 	}
 
@@ -40,7 +42,7 @@ metadata {
 
 def parse(String description) {
     def result = null
-    def cmd = zwave.parse(description, [0x20: 1, 0x84: 1, 0x30: 1, 0x70: 1, 0x31: 3, 0x71: 1])
+    def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1])
 
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
