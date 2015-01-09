@@ -70,7 +70,7 @@ metadata {
 	    preferences {
         
         	input("dimRate", "enum", title: "Dim Rate", options: ["Instant", "Normal", "Slow", "Very Slow"], defaultValue: "Normal", required: false, displayDuringSetup: true)
-            input("dimOnOff", "boolean", title: "Dim transition for On/Off commands?", required: false, displayDuringSetup: true)
+            input("dimOnOff", "enum", title: "Dim transition for On/Off commands?", options: ["Yes", "No"], defaultValue: "No", required: false, displayDuringSetup: true)
             
     }
 }
@@ -170,11 +170,13 @@ def parse(String description) {
 }
 
 def poll() {
-	[
+
+    [
 	"st rattr 0x${device.deviceNetworkId} 1 6 0", "delay 500",
     "st rattr 0x${device.deviceNetworkId} 1 8 0", "delay 500",
     "st wattr 0x${device.deviceNetworkId} 1 8 0x10 0x21 {${state.dOnOff}}"
     ]
+    
 }
 
 def updated() {
@@ -221,6 +223,39 @@ def updated() {
         
     }
     
+        if (dimOnOff == "Yes"){
+			switch (dimOnOff){
+        		case "InstantOnOff":
+
+            		state.rate = "0000"
+                	if (state.rate == "0000") { state.dOnOff = "0000"}
+                    break
+
+            	case "NormalOnOff":
+
+            		state.rate = "1500"
+                    if (state.rate == "1500") { state.dOnOff = "0015"}
+                	break
+
+            	case "SlowOnOff":
+
+            		state.rate = "2500"
+                    if (state.rate == "2500") { state.dOnOff = "0025"}
+               		break
+                
+            	case "Very SlowOnOff":
+            
+            		state.rate = "3500"
+                    if (state.rate == "3500") { state.dOnOff = "0035"}
+                	break
+
+        	}
+            
+    }
+    else{
+    	state.dOnOff = "0000"
+    }
+    
     "st wattr 0x${device.deviceNetworkId} 1 8 0x10 0x21 {${state.dOnOff}}"
 
 
@@ -245,11 +280,14 @@ def off() {
 }
 
 def refresh() {
-	[
+
+    [
 	"st rattr 0x${device.deviceNetworkId} 1 6 0", "delay 500",
     "st rattr 0x${device.deviceNetworkId} 1 8 0", "delay 500",
     "st wattr 0x${device.deviceNetworkId} 1 8 0x10 0x21 {${state.dOnOff}}"
     ]
+    poll()
+    
 }
 
 def setLevel(value) {
