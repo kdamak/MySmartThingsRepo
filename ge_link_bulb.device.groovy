@@ -30,6 +30,8 @@
  *				Modified to clean up trace&debug logging, added new code from @sticks18 for parsing "on/off" to determine if the bulb is manually turned on and immediately update the app
  *	Change 6:	2015-01-02	(Sticks18)
  *				Modified to allow dim rate in Preferences. Added ability to dim during On/Off commands and included this option in Preferences. Defaults are "Normal" and no dim for On/Off.
+ *	Change 7:	2015-01-09	(tslagle13)
+ *				dimOnOff is was boolean, and switched to enum. Properly update "rampOn" and "rampOff" when refreshed or a polled (dim transition for On/Off commands)
  *
  *
  */
