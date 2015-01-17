@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Thermostat v2 - 1st Floor", namespace: "jscgs350", author: "jsconst@gmail.com") {
+	definition (name: "My Thermostat v2 - 1st Floor", namespace: "jscgs350", author: "smartthings") {
 		capability "Refresh"
 		capability "Actuator"
 		capability "Temperature Measurement"
