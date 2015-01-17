@@ -336,10 +336,13 @@ def poll() {
 		zwave.thermostatSetpointV1.thermostatSetpointGet(setpointType: 1).format(),
 		zwave.thermostatSetpointV1.thermostatSetpointGet(setpointType: 2).format(),
 		zwave.thermostatModeV2.thermostatModeGet().format(),
+		zwave.thermostatFanStateV1.thermostatFanStateGet().format(),
 		zwave.thermostatFanModeV3.thermostatFanModeGet().format(),
 		zwave.thermostatOperatingStateV1.thermostatOperatingStateGet().format()
 	], 2300)
 }
+
+thermostatFanState
 
 def quickSetHeat(degrees) {
 	setHeatingSetpoint(degrees, 1000)
