@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Thermostat v2 - 1st Floor", namespace: "jscgs350", author: "smartthings") {
+	definition (name: "My Thermostat v2 - 1st Floor", namespace: "jscgs350", author: "jsconst@gmail.com") {
 		capability "Refresh"
 		capability "Actuator"
 		capability "Temperature Measurement"
@@ -57,10 +57,10 @@ metadata {
 			state "fanCirculate", label:'', action:"switchFanMode", icon:"st.thermostat.fan-circulate"
 		}
 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-			state "heat", label:'${currentValue}°\nHeat', unit:"F", backgroundColor:"#ffffff"
+			state "heat", label:'${currentValue}°', unit:"F", backgroundColor:"#ffffff"
 		}
 		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
-			state "cool", label:'${currentValue}°\nCool', unit:"F", backgroundColor:"#ffffff"
+			state "cool", label:'${currentValue}°', unit:"F", backgroundColor:"#ffffff"
 		}
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
 			state "default", action:"polling.poll", icon:"st.secondary.refresh"
@@ -308,10 +308,12 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeSuppo
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.thermostatfanmodev3.ThermostatFanModeSupportedReport cmd) {
-	def supportedFanModes = ""
-	if(cmd.auto) { supportedFanModes += "fanAuto " }
-	if(cmd.low) { supportedFanModes += "fanOn " }
-	if(cmd.circulation) { supportedFanModes += "fanCirculate " }
+	def supportedFanModes = "fanAuto fanOn fanCirculate "
+
+//	def supportedFanModes = ""
+//	if(cmd.auto) { supportedFanModes += "fanAuto " }
+//	if(cmd.low) { supportedFanModes += "fanOn " }
+//	if(cmd.circulation) { supportedFanModes += "fanCirculate " }
 
 	state.supportedFanModes = supportedFanModes
 }
@@ -449,7 +451,8 @@ def switchToMode(nextMode) {
 def switchFanMode() {
 	def currentMode = device.currentState("thermostatFanMode")?.value
 	def lastTriedMode = state.lastTriedFanMode ?: currentMode ?: "off"
-	def supportedModes = getDataByName("supportedFanModes") ?: "fanAuto fanOn"
+	def supportedModes = "fanAuto fanOn fanCirculate"
+//	def supportedModes = getDataByName("supportedFanModes") ?: "fanAuto fanOn"
 	def modeOrder = ["fanAuto", "fanCirculate", "fanOn"]
 	def next = { modeOrder[modeOrder.indexOf(it) + 1] ?: modeOrder[0] }
 	def nextMode = next(lastTriedMode)
@@ -460,7 +463,8 @@ def switchFanMode() {
 }
 
 def switchToFanMode(nextMode) {
-	def supportedFanModes = getDataByName("supportedFanModes")
+	def supportedFanModes = "fanAuto fanOn fanCirculate"
+//	def supportedFanModes = getDataByName("supportedFanModes")
 	if(supportedFanModes && !supportedFanModes.contains(nextMode)) log.warn "thermostat mode '$nextMode' is not supported"
 
 	def returnCommand
