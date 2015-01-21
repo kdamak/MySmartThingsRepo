@@ -80,9 +80,18 @@ metadata {
         standardTile("coolLevelDown", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
                         state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.custom.buttons.subtract-icon"
         }
-        
+        standardTile("thermostatOperatingState", "device.thermostatOperatingState", decoration: "flat") {
+            state "heating", label:''
+            state "cooling", label:'' 
+            state "idle", label:''
+        }
+        standardTile("thermostatFanState", "device.thermostatFanState", decoration: "flat") {
+            state "running", label:''
+            state "idle", label:''
+        }
+
 		main "temperature"
-		details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "refresh", "configure"])
+		details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "thermostatOperatingState", "thermostatFanState", "refresh", "configure"])
 	}
 }
 
@@ -214,13 +223,13 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatoperatingstatev1.Thermosta
 	def map = [:]
 	switch (cmd.operatingState) {
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_IDLE:
-			map.value = "idle"
+			map.value = "Unit is Idle"
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_HEATING:
-			map.value = "heating"
+			map.value = "Unit is Heating"
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_COOLING:
-			map.value = "cooling"
+			map.value = "Unit is Cooling"
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_FAN_ONLY:
 			map.value = "fan only"
@@ -243,13 +252,13 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatfanstatev1.ThermostatFanSt
 	def map = [name: "thermostatFanState", unit: ""]
 	switch (cmd.fanOperatingState) {
 		case 0:
-			map.value = "idle"
+			map.value = "Fan is Idle"
 			break
 		case 1:
-			map.value = "running"
+			map.value = "Fan is Running"
 			break
 		case 2:
-			map.value = "running high"
+			map.value = "Fan Running High"
 			break
 	}
 	map
