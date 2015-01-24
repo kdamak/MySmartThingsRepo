@@ -13,6 +13,8 @@ metadata {
         command "medSpeed"
         command "highSpeed"
 
+		attribute "currentSpeed", "string"
+
 		fingerprint inClusters: "0x26"
 	}
 
@@ -34,6 +36,9 @@ metadata {
 		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 3, inactiveLabel: false) {
 			state "level", action:"switch level.setLevel"
 		}
+        valueTile("currentSpeed", "device.currentSpeed", inactiveLabel: false, decoration: "flat") {
+            state ("default", label:'')
+        }
 
 //Speed control row
         standardTile("lowSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
@@ -47,7 +52,7 @@ metadata {
         }
 
 		main(["switch"])
-		details(["switch", "refresh", "indicator", "lowSpeed", "medSpeed", "highSpeed"])
+		details(["switch", "currentSpeed", "indicator", "lowSpeed", "medSpeed", "highSpeed", "refresh"])
 	}
 }
 
@@ -135,6 +140,15 @@ def doCreateEvent(physicalgraph.zwave.Command cmd, Map item1) {
 		item2.canBeCurrentState = true
 		item2.isStateChange = isStateChange(device, item2.name, item2.value)
 		item2.displayed = false
+        if (item2.value == "30") {
+        	sendEvent(name: "currentSpeed", value: "LOW" as String)
+        }
+        if (item2.value == "62") {
+        	sendEvent(name: "currentSpeed", value: "MEDIUM" as String)
+        }
+        if (item2.value == "99") {
+        	sendEvent(name: "currentSpeed", value: "HIGH" as String)
+        }        
 		result << item2
 	}
 	result
@@ -174,16 +188,19 @@ def setLevel(value, duration) {
 
 def lowSpeed() {
 	log.debug "Low speed settings"
+    def dispSpeed = "LOW"
     delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
 def medSpeed() {
 	log.debug "Medium speed settings"
+    def dispSpeed = "MEDIUM"
     delayBetween ([zwave.basicV1.basicSet(value: 62).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
 def highSpeed() {
 	log.debug "High speed settings"
+    def dispSpeed = "HIGH"
     delayBetween ([zwave.basicV1.basicSet(value: 99).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
