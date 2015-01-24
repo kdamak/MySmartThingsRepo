@@ -188,19 +188,16 @@ def setLevel(value, duration) {
 
 def lowSpeed() {
 	log.debug "Low speed settings"
-    def dispSpeed = "LOW"
     delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
 def medSpeed() {
 	log.debug "Medium speed settings"
-    def dispSpeed = "MEDIUM"
     delayBetween ([zwave.basicV1.basicSet(value: 62).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
 def highSpeed() {
 	log.debug "High speed settings"
-    def dispSpeed = "HIGH"
     delayBetween ([zwave.basicV1.basicSet(value: 99).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
