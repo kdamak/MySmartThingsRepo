@@ -36,7 +36,7 @@ metadata {
 		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 3, inactiveLabel: false) {
 			state "level", action:"switch level.setLevel"
 		}
-        valueTile("currentSpeed", "device.currentSpeed", inactiveLabel: false, decoration: "flat") {
+        valueTile("currentSpeed", "device.currentSpeed", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state ("default", label:'')
         }
 
@@ -125,6 +125,9 @@ def doCreateEvent(physicalgraph.zwave.Command cmd, Map item1) {
 
 	item1.name = "switch"
 	item1.value = cmd.value ? "on" : "off"
+    if (item1.value == "off") {
+     	sendEvent(name: "currentSpeed", value: "OFF" as String)
+    }
 	item1.handlerName = item1.value
 	item1.descriptionText = "${item1.linkText} was turned ${item1.value}"
 	item1.canBeCurrentState = true
