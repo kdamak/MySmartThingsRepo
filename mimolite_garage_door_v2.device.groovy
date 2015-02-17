@@ -8,14 +8,16 @@
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v2", namespace: "jscgs350", author: "jscgs350") {
-		capability "Refresh"
-		capability "Contact Sensor"
-		capability "Momentary"
-		capability "Polling"
-		capability "Switch"
+		capability "Alarm"
+        capability "Momentary"
+	capability "Polling"
+        capability "Refresh"
+        capability "Switch"
+        capability "Contact Sensor"
+        capability "Configuration"
         attribute "power", "string"
 
-		fingerprint deviceId:"0x1000", inClusters:"0x72, 0x86, 0x71, 0x30, 0x31, 0x35, 0x70, 0x85, 0x25, 0x03"
+	fingerprint deviceId:"0x1000", inClusters:"0x72, 0x86, 0x71, 0x30, 0x31, 0x35, 0x70, 0x85, 0x25, 0x03"
 
 	}
 
