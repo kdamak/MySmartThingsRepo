@@ -3,7 +3,7 @@
  * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
  *  Author: Many ST community members
- *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
+ *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04, 2015-02-16
  */
 metadata {
 	// Automatically generated. Make future change here.
