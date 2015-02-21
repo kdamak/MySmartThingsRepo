@@ -15,7 +15,7 @@ metadata {
 
 		attribute "currentSpeed", "string"
 
-		fingerprint inClusters: "0x26"
+//		fingerprint inClusters: "0x26"
 	}
 
 	tiles {
@@ -37,7 +37,7 @@ metadata {
 			state "level", action:"switch level.setLevel"
 		}
         valueTile("currentSpeed", "device.currentSpeed", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-            state ("default", label:'')
+            state ("default", label:'${currentValue}')
         }
 
 //Speed control row
