@@ -14,6 +14,8 @@ metadata {
 		capability "Battery"
 
 		fingerprint deviceId: "0x2001", inClusters: "0x30,0x80,0x84,0x70,0x85,0x86,0x72"
+		fingerprint deviceId: "0x07", inClusters: "0x30"
+		fingerprint deviceId: "0x0701", inClusters: "0x5E,0x86,0x72,0x98", outClusters: "0x5A,0x82"
 	}
 
 	// simulator metadata
@@ -27,7 +29,7 @@ metadata {
 	tiles {
 		standardTile("contact", "device.contact", width: 2, height: 2) {
 			state "open", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffa81e"
-			state "closed", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffffff"
+			state "closed", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#79b821"
 		}
         valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
 			state "battery", label:'${currentValue}% battery', unit:""
@@ -43,13 +45,6 @@ def parse(String description) {
 	def result = null
 	if (description.startsWith("Err")) {
 	    result = createEvent(descriptionText:description)
-	} else if (description == "updated") {
-		if (!state.MSR) {
-			result = [
-				response(zwave.wakeUpV1.wakeUpIntervalSet(seconds:4*3600, nodeid:zwaveHubNodeId)),
-				response(zwave.manufacturerSpecificV2.manufacturerSpecificGet()),
-			]
-		}
 	} else {
 		def cmd = zwave.parse(description, [0x20: 1, 0x25: 1, 0x30: 1, 0x31: 5, 0x80: 1, 0x84: 1, 0x71: 3, 0x9C: 1])
 		if (cmd) {
@@ -59,12 +54,17 @@ def parse(String description) {
 	return result
 }
 
+def updated() {
+	response([
+		zwave.wakeUpV1.wakeUpIntervalSet(seconds:4*3600, nodeid:zwaveHubNodeId).format(),
+		zwave.manufacturerSpecificV2.manufacturerSpecificGet().format()
+	])
+}
+
 def sensorValueEvent(value) {
 	if (value) {
-    	log.debug "$device.displayName is open"
 		createEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
 	} else {
-    	log.debug "$device.displayName is closed"
 		createEvent(name: "contact", value: "closed", descriptionText: "$device.displayName is closed")
 	}
 }
@@ -128,18 +128,19 @@ def zwaveEvent(physicalgraph.zwave.commands.notificationv3.NotificationReport cm
 
 def zwaveEvent(physicalgraph.zwave.commands.wakeupv1.WakeUpNotification cmd)
 {
-	def result = [createEvent(descriptionText: "${device.displayName} woke up", isStateChange: false)]
+	def event = createEvent(descriptionText: "${device.displayName} woke up", isStateChange: false)
+	def cmds = []
 	if (!state.lastbat || (new Date().time) - state.lastbat > 53*60*60*1000) {
-		result << response(zwave.batteryV1.batteryGet())
-		result << response("delay 1200")
+		cmds << batteryGetCommand()
+		cmds << "delay 1200"
 	}
 	if (!state.MSR) {
-		result << response(zwave.wakeUpV1.wakeUpIntervalSet(seconds:4*3600, nodeid:zwaveHubNodeId))
-		result << response(zwave.manufacturerSpecificV2.manufacturerSpecificGet())
-		result << response("delay 1200")
+		cmds << zwave.wakeUpV1.wakeUpIntervalSet(seconds:4*3600, nodeid:zwaveHubNodeId).format()
+		cmds << zwave.manufacturerSpecificV2.manufacturerSpecificGet().format()
+		cmds << "delay 1200"
 	}
-	result << response(zwave.wakeUpV1.wakeUpNoMoreInformation())
-	result
+	cmds << zwave.wakeUpV1.wakeUpNoMoreInformation().format()
+	[event, response(cmds)]
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
@@ -169,14 +170,32 @@ def zwaveEvent(physicalgraph.zwave.commands.manufacturerspecificv2.ManufacturerS
 	if (msr == "011A-0601-0901") {  // Enerwave motion doesn't always get the associationSet that the hub sends on join
 		result << response(zwave.associationV1.associationSet(groupingIdentifier:1, nodeId:zwaveHubNodeId))
 	} else if (!device.currentState("battery")) {
-		result << response(zwave.batteryV1.batteryGet())
+		if(msr == "0086-0102-0059") state.sec = 1
+		result << response(batteryGetCommand())
 	}
 
 	result
 }
 
+def zwaveEvent(physicalgraph.zwave.commands.securityv1.SecurityMessageEncapsulation cmd) {
+	def encapsulatedCommand = cmd.encapsulatedCommand([0x20: 1, 0x85: 2, 0x70: 1])
+	// log.debug "encapsulated: $encapsulatedCommand"
+	if (encapsulatedCommand) {
+		state.sec = 1
+		zwaveEvent(encapsulatedCommand)
+	}
+}
+
 def zwaveEvent(physicalgraph.zwave.Command cmd) {
 	createEvent(descriptionText: "$device.displayName: $cmd", displayed: false)
+}
+
+def batteryGetCommand() {
+	def cmd = zwave.batteryV1.batteryGet()
+	if (state.sec) {
+		cmd = zwave.securityV1.securityMessageEncapsulation().encapsulate(cmd)
+	}
+	cmd.format()
 }
 
 def retypeBasedOnMSR() {
