@@ -1,10 +1,6 @@
 /*
- * Capabilities
- * - Battery
- * - Configuration
- * - Refresh
- * - Switch
- * - Valve
+ * Modeled after the ST device type to add the ALARM capability and def both() that gets called to close
+ * the valve when a leak detector is tripped, or any other device that can trip alarms.
 */
 
 metadata {
