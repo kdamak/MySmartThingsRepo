@@ -12,8 +12,9 @@ metadata {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Battery"
+		capability "Configuration"
 
-		fingerprint deviceId: "0x2001", inClusters: "0x30,0x80,0x84,0x70,0x85,0x86,0x72"
+		fingerprint deviceId: "0x2001", inClusters: "0x30,0x80,0x84,0x85,0x86,0x72"
 		fingerprint deviceId: "0x07", inClusters: "0x30"
 		fingerprint deviceId: "0x0701", inClusters: "0x5E,0x86,0x72,0x98", outClusters: "0x5A,0x82"
 	}
@@ -23,6 +24,7 @@ metadata {
 		// status messages
 		status "open":  "command: 2001, payload: FF"
 		status "closed": "command: 2001, payload: 00"
+		status "wakeup": "command: 8407, payload: 00"
 	}
 
 	// UI tile definitions
@@ -31,10 +33,9 @@ metadata {
 			state "open", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffa81e"
 			state "closed", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#79b821"
 		}
-        valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
+		valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
 			state "battery", label:'${currentValue}% battery', unit:""
 		}
-
 
 		main "contact"
 		details(["contact", "battery"])
@@ -43,22 +44,49 @@ metadata {
 
 def parse(String description) {
 	def result = null
-	if (description.startsWith("Err")) {
-	    result = createEvent(descriptionText:description)
-	} else {
+	if (description.startsWith("Err 106")) {
+		if (!state.sec) {
+			log.debug description
+		} else {
+			result = createEvent(
+				descriptionText: "This sensor failed to complete the network security key exchange. If you are unable to control it via SmartThings, you must remove it from your network and add it again.",
+				eventType: "ALERT",
+				name: "secureInclusion",
+				value: "failed",
+				isStateChange: true,
+			)
+		}
+	} else if (description != "updated") {
 		def cmd = zwave.parse(description, [0x20: 1, 0x25: 1, 0x30: 1, 0x31: 5, 0x80: 1, 0x84: 1, 0x71: 3, 0x9C: 1])
 		if (cmd) {
 			result = zwaveEvent(cmd)
 		}
 	}
+	log.debug "parsed '$description' to $result"
 	return result
 }
 
 def updated() {
-	response([
-		zwave.wakeUpV1.wakeUpIntervalSet(seconds:4*3600, nodeid:zwaveHubNodeId).format(),
-		zwave.manufacturerSpecificV2.manufacturerSpecificGet().format()
-	])
+	def cmds = []
+	if (!state.MSR) {
+		cmds = [
+			zwave.manufacturerSpecificV2.manufacturerSpecificGet().format(),
+			"delay 1200",
+			zwave.wakeUpV1.wakeUpNoMoreInformation().format()
+		]
+	} else if (!state.lastbat) {
+		cmds = []
+	} else {
+		cmds = [zwave.wakeUpV1.wakeUpNoMoreInformation().format()]
+	}
+	response(cmds)
+}
+
+def configure() {
+	delayBetween([
+		zwave.manufacturerSpecificV2.manufacturerSpecificGet().format(),
+		batteryGetCommand()
+	], 6000)
 }
 
 def sensorValueEvent(value) {
@@ -130,16 +158,16 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv1.WakeUpNotification cmd)
 {
 	def event = createEvent(descriptionText: "${device.displayName} woke up", isStateChange: false)
 	def cmds = []
-	if (!state.lastbat || (new Date().time) - state.lastbat > 53*60*60*1000) {
-		cmds << batteryGetCommand()
-		cmds << "delay 1200"
-	}
 	if (!state.MSR) {
 		cmds << zwave.wakeUpV1.wakeUpIntervalSet(seconds:4*3600, nodeid:zwaveHubNodeId).format()
 		cmds << zwave.manufacturerSpecificV2.manufacturerSpecificGet().format()
 		cmds << "delay 1200"
 	}
-	cmds << zwave.wakeUpV1.wakeUpNoMoreInformation().format()
+	if (!state.lastbat || now() - state.lastbat > 53*60*60*1000) {
+		cmds << batteryGetCommand()
+	} else {
+		cmds << zwave.wakeUpV1.wakeUpNoMoreInformation().format()
+	}
 	[event, response(cmds)]
 }
 
@@ -152,7 +180,7 @@ def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
 	} else {
 		map.value = cmd.batteryLevel
 	}
-	state.lastbat = new Date().time
+	state.lastbat = now()
 	[createEvent(map), response(zwave.wakeUpV1.wakeUpNoMoreInformation())]
 }
 
