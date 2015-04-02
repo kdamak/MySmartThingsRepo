@@ -29,7 +29,7 @@ metadata {
 
 	tiles {
 		valueTile("temperature", "device.temperature", width: 2, height: 2) {
-			state("temperature", label:'1st:\n ${currentValue}°', unit:"F",
+			state("temperature", label:'1st:\n${currentValue}°', unit:"F",
 				backgroundColors:[
 					[value: 31, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
@@ -74,20 +74,20 @@ metadata {
         standardTile("heatLevelDown", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
                         state "heatLevelDown", label:'Heat', action:"heatLevelDown", icon:"st.custom.buttons.subtract-icon"
         }
-        standardTile("coolLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+        standardTile("coolLevelUp", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
                         state "coolLevelUp", label:'Cool', action:"coolLevelUp", icon:"st.custom.buttons.add-icon"
         }
-        standardTile("coolLevelDown", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+        standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
                         state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.custom.buttons.subtract-icon"
         }
-        standardTile("thermostatOperatingState", "device.thermostatOperatingState", decoration: "flat") {
-            state "heating", label:''
-            state "cooling", label:'' 
-            state "idle", label:''
+        standardTile("thermostatOperatingState", "device.thermostatOperatingState", inactiveLabel: false, decoration: "flat") {
+            state "heating", label:'', icon:"st.thermostat.heating"
+            state "cooling", label:'', icon:"st.thermostat.cooling"
+            state "idle", label:'', icon:"st.thermostat.heating-cooling-off"
         }
-        standardTile("thermostatFanState", "device.thermostatFanState", decoration: "flat") {
-            state "running", label:''
-            state "idle", label:''
+        standardTile("thermostatFanState", "device.thermostatFanState", inactiveLabel: false, decoration: "flat") {
+            state "running", label:'', icon:"st.thermostat.fan-on"
+            state "idle", label:'', icon:"st.thermostat.fan-off"
         }
 
 		main "temperature"
@@ -223,13 +223,13 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatoperatingstatev1.Thermosta
 	def map = [:]
 	switch (cmd.operatingState) {
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_IDLE:
-			map.value = "Unit is Idle"
+			map.value = "idle"
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_HEATING:
-			map.value = "Unit is Heating"
+			map.value = "heating"
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_COOLING:
-			map.value = "Unit is Cooling"
+			map.value = "cooling"
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_FAN_ONLY:
 			map.value = "fan only"
@@ -252,13 +252,13 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatfanstatev1.ThermostatFanSt
 	def map = [name: "thermostatFanState", unit: ""]
 	switch (cmd.fanOperatingState) {
 		case 0:
-			map.value = "Fan is Idle"
+			map.value = "idle"
 			break
 		case 1:
-			map.value = "Fan is Running"
+			map.value = "running"
 			break
 		case 2:
-			map.value = "Fan Running High"
+			map.value = "running high"
 			break
 	}
 	map
