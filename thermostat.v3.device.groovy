@@ -1,5 +1,5 @@
 /*
-** This device type has been specifically created for the Evolve T100R Thermostat, and MUST have the fan "cycler" setting enabled.
+** This device type can be used with any typical zwave thermostat.  If used with an Evolve T100R, just enable cycler mode on the thermo itself.
 */
 metadata {
 	// Automatically generated. Make future change here.
@@ -50,28 +50,28 @@ metadata {
             state ("default", label:'${currentValue}', icon:"st.tesla.tesla-hvac")
         }
 		standardTile("thermostatFanState", "device.thermostatFanState", inactiveLabel: false, decoration: "flat") {
-            state "running", label:'Fan is On', icon:"st.Appliances.appliances11"
-            state "idle", label:'Fan is Off', icon:"st.Appliances.appliances11"
+            state "running", label:'Fan On', icon:"st.Appliances.appliances11"
+            state "idle", label:'Fan Off', icon:"st.Appliances.appliances11"
         }        
 //Thermostat Mode Control Row
         standardTile("modeoff", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "off", label:'Turn Off Unit', action:"modeoff", icon:"st.secondary.off"
+            state "off", label:'', action:"modeoff", icon:"st.secondary.off"
         }
         standardTile("modeheat", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "heat", label:'Turn On Heat', action:"modeheat", icon:"st.custom.wuk.sunny"
+            state "heat", label:'Heat', action:"modeheat", icon:"st.custom.wuk.sunny"
         }
         standardTile("modecool", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "cool", label:'Turn On A/C', action:"modecool", icon:"st.custom.wuk.nt_snow"
+            state "cool", label:'A/C', action:"modecool", icon:"st.custom.wuk.nt_snow"
         }        
 //Fan Mode Control Row        
         standardTile("fanauto", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "fanauto", label:'Set To Auto', action:"fanauto", icon:"st.Appliances.appliances11"
+            state "fanauto", label:'Auto', action:"fanauto", icon:"st.Appliances.appliances11"
         }
         standardTile("fanon", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "fanon", label:'Turn On Fan', action:"fanon", icon:"st.Appliances.appliances11"
+            state "fanon", label:'On', action:"fanon", icon:"st.Appliances.appliances11"
         }
         standardTile("fancir", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "fancir", label:'Set to Cycle', action:"fancir", icon:"st.Appliances.appliances11"
+            state "fancir", label:'Cycle', action:"fancir", icon:"st.Appliances.appliances11"
         }
 //Heating Set Point Controls Row
         standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
@@ -201,11 +201,11 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatoperatingstatev1.Thermosta
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_HEATING:
 			map.value = "heating"
-            sendEvent(name: "currentMode", value: "Heat is Running" as String)
+            sendEvent(name: "currentMode", value: "Heat Running" as String)
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_COOLING:
 			map.value = "cooling"
-            sendEvent(name: "currentMode", value: "A/C is Running" as String)
+            sendEvent(name: "currentMode", value: "A/C Running" as String)
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_FAN_ONLY:
 			map.value = "fan only"
@@ -245,23 +245,23 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeRepor
 	switch (cmd.mode) {
 		case physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeReport.MODE_OFF:
 			map.value = "off"
-            sendEvent(name: "currentMode", value: "Unit is Off" as String)
+            sendEvent(name: "currentMode", value: "Unit Off" as String)
             break
 		case physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeReport.MODE_HEAT:
 			map.value = "heat"
-            sendEvent(name: "currentMode", value: "Heat is Idle" as String)
+            sendEvent(name: "currentMode", value: "Heat Idle" as String)
             break
 		case physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeReport.MODE_AUXILIARY_HEAT:
 			map.value = "emergencyHeat"
-            sendEvent(name: "currentMode", value: "AUX/EM is Idle" as String)
+            sendEvent(name: "currentMode", value: "AUX/EM Idle" as String)
             break
 		case physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeReport.MODE_COOL:
 			map.value = "cool"
-            sendEvent(name: "currentMode", value: "A/C is Idle" as String)
+            sendEvent(name: "currentMode", value: "A/C Idle" as String)
             break
 		case physicalgraph.zwave.commands.thermostatmodev2.ThermostatModeReport.MODE_AUTO:
 			map.value = "auto"
-            sendEvent(name: "currentMode", value: "Auto is Idle" as String)
+            sendEvent(name: "currentMode", value: "Auto Idle" as String)
             break
 	}
 	map.name = "thermostatMode"
