@@ -55,13 +55,13 @@ metadata {
         }        
 //Thermostat Mode Control Row
         standardTile("modeoff", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "off", label:'', action:"modeoff", icon:"st.secondary.off"
+            state "off", label:'', action:"modeoff", icon:"st.thermostat.heating-cooling-off"
         }
         standardTile("modeheat", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "heat", label:'Heat', action:"modeheat", icon:"st.custom.wuk.sunny"
+            state "heat", label:'', action:"modeheat", icon:"st.thermostat.heat"
         }
         standardTile("modecool", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "cool", label:'A/C', action:"modecool", icon:"st.custom.wuk.nt_snow"
+            state "cool", label:'', action:"modecool", icon:"st.thermostat.cool"
         }        
 //Fan Mode Control Row        
         standardTile("fanauto", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
