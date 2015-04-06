@@ -17,6 +17,8 @@ metadata {
 		command "heatLevelDown"
 		command "coolLevelUp"
 		command "coolLevelDown"
+        command "quickSetCool"
+        command "quickSetHeat"
         command "modeoff"
         command "modeheat"
         command "modecool"
@@ -26,6 +28,7 @@ metadata {
         
 		attribute "thermostatFanState", "string"
         attribute "currentMode", "string"
+        attribute "currentfanMode", "string"
         
 		fingerprint deviceId: "0x08"
 		fingerprint inClusters: "0x43,0x40,0x44,0x31"
@@ -73,27 +76,25 @@ metadata {
         standardTile("fancir", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
             state "fancir", label:'Cycle', action:"fancir", icon:"st.Appliances.appliances11"
         }
+
 //Heating Set Point Controls Row
-        standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-            state "heatLevelUp", label:'Heat', action:"heatLevelUp", icon:"st.custom.buttons.add-icon"
-        }
+		controlTile("heatSliderControl", "device.heatingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false, range:"(60..90)") {
+			state "setHeatingSetpoint", action:"quickSetHeat", backgroundColor:"#FF0000"
+		}
 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-			state "heat", label:'${currentValue}°', unit:"F", backgroundColor:"#ffffff"
+			state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
 		}
-        standardTile("heatLevelDown", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-            state "heatLevelDown", label:'Heat', action:"heatLevelDown", icon:"st.custom.buttons.subtract-icon"
-        }
 //Cooling Set Point Controls Row
-        standardTile("coolLevelUp", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-            state "coolLevelUp", label:'Cool', action:"coolLevelUp", icon:"st.custom.buttons.add-icon"
-        }
-		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
-			state "cool", label:'${currentValue}°', unit:"F", backgroundColor:"#ffffff"
+		controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false, range:"(60..90)") {
+			state "setCoolingSetpoint", action:"quickSetCool", backgroundColor: "#0000FF"
 		}
-        standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
-            state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.custom.buttons.subtract-icon"
-        }
+		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
+			state "cool", label:'${currentValue}° cool', backgroundColor:"#ffffff"
+		}
 //Refresh and Config Controls Row
+        standardTile("thermostatFanMode", "device.device.currentfanMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+            state ("default", label:'${currentValue}', icon:"st.Appliances.appliances11")
+        }
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
 			state "default", action:"polling.poll", icon:"st.secondary.refresh"
 		}
@@ -102,8 +103,8 @@ metadata {
 		}
 
 		main "temperature"
-		details(["temperature", "thermostatOperatingState", "thermostatFanState", "modeoff", "modeheat", "modecool", "fanauto", "fanon", "fancir", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "refresh", "configure"])
-	}
+		details(["temperature", "thermostatOperatingState", "thermostatFanState", "modeoff", "modeheat", "modecool", "fanauto", "fanon", "fancir", "heatSliderControl", "heatingSetpoint", "coolSliderControl", "coolingSetpoint", "thermostatFanMode", "refresh", "configure"])
+}
 }
 
 def parse(String description)
@@ -201,11 +202,11 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatoperatingstatev1.Thermosta
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_HEATING:
 			map.value = "heating"
-            sendEvent(name: "currentMode", value: "Heat Running" as String)
+            sendEvent(name: "currentMode", value: "Heat On" as String)
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_COOLING:
 			map.value = "cooling"
-            sendEvent(name: "currentMode", value: "A/C Running" as String)
+            sendEvent(name: "currentMode", value: "A/C On" as String)
 			break
 		case physicalgraph.zwave.commands.thermostatoperatingstatev1.ThermostatOperatingStateReport.OPERATING_STATE_FAN_ONLY:
 			map.value = "fan only"
@@ -273,12 +274,15 @@ def zwaveEvent(physicalgraph.zwave.commands.thermostatfanmodev3.ThermostatFanMod
 	switch (cmd.fanMode) {
 		case physicalgraph.zwave.commands.thermostatfanmodev3.ThermostatFanModeReport.FAN_MODE_AUTO_LOW:
 			map.value = "fanAuto"
+            sendEvent(name: "currentfanMode", value: "Auto Mode" as String)
 			break
 		case physicalgraph.zwave.commands.thermostatfanmodev3.ThermostatFanModeReport.FAN_MODE_LOW:
 			map.value = "fanOn"
+            sendEvent(name: "currentfanMode", value: "On Mode" as String)
 			break
 		case physicalgraph.zwave.commands.thermostatfanmodev3.ThermostatFanModeReport.FAN_MODE_CIRCULATION:
 			map.value = "fanCirculate"
+            sendEvent(name: "currentfanMode", value: "Cycle Mode" as String)
 			break
 	}
 	map.name = "thermostatFanMode"
@@ -338,6 +342,10 @@ def heatLevelDown(){
     setHeatingSetpoint(nextLevel)
 }
 
+def quickSetHeat(degrees) {
+	setHeatingSetpoint(degrees, 1000)
+}
+
 def setHeatingSetpoint(degrees, delay = 30000) {
 	setHeatingSetpoint(degrees.toDouble(), delay)
 }
@@ -380,6 +388,10 @@ def coolLevelDown(){
     }
     log.debug "Setting cool set point down to: ${nextLevel}"
     setCoolingSetpoint(nextLevel)
+}
+
+def quickSetCool(degrees) {
+	setCoolingSetpoint(degrees, 1000)
 }
 
 def setCoolingSetpoint(degrees, delay = 30000) {
