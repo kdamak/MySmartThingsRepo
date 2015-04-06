@@ -92,7 +92,7 @@ metadata {
 			state "cool", label:'${currentValue}° cool', backgroundColor:"#ffffff"
 		}
 //Refresh and Config Controls Row
-        standardTile("thermostatFanMode", "device.device.currentfanMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+        standardTile("modefan", "device.device.currentfanMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state ("default", label:'${currentValue}', icon:"st.Appliances.appliances11")
         }
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
@@ -103,7 +103,7 @@ metadata {
 		}
 
 		main "temperature"
-		details(["temperature", "thermostatOperatingState", "thermostatFanState", "modeoff", "modeheat", "modecool", "fanauto", "fanon", "fancir", "heatSliderControl", "heatingSetpoint", "coolSliderControl", "coolingSetpoint", "thermostatFanMode", "refresh", "configure"])
+		details(["temperature", "thermostatOperatingState", "thermostatFanState", "modeoff", "modeheat", "modecool", "fanauto", "fanon", "fancir", "heatSliderControl", "heatingSetpoint", "coolSliderControl", "coolingSetpoint", "modefan", "refresh", "configure"])
 }
 }
 
@@ -146,6 +146,19 @@ def parse(String description)
 	} else if (map.name == "thermostatFanMode" && map.isStateChange) {
 		state.lastTriedFanMode = map.value
 	}
+
+	if (map.name == "thermostatFanMode"){
+//		sendEvent(name: "currentfanMode", value: "${map.value}" as String)
+		if (map.value == "fanAuto") {
+        	sendEvent(name: "currentfanMode", value: "Auto Mode" as String)
+	    }
+	    if (map.value == "fanOn") {
+	        	sendEvent(name: "currentfanMode", value: "On Mode" as String)
+		}
+	    if (map.value == "fanCirculate") {
+	        	sendEvent(name: "currentfanMode", value: "Cycle Mode" as String)
+ 	   	}
+}
 	log.debug "Parse returned $result"
 	result
 }
