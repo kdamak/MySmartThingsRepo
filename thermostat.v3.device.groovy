@@ -92,11 +92,11 @@ metadata {
 			state "cool", label:'${currentValue}° cool', backgroundColor:"#ffffff"
 		}
 //Refresh and Config Controls Row
-        standardTile("modefan", "device.device.currentfanMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+        standardTile("modefan", "device.currentfanMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state ("default", label:'${currentValue}', icon:"st.Appliances.appliances11")
         }
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-			state "default", action:"polling.poll", icon:"st.secondary.refresh"
+			state "default", action:"poll", icon:"st.secondary.refresh"
 		}
 		standardTile("configure", "device.configure", inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'  ', action:"configuration.configure", icon:"st.secondary.configure"
@@ -112,6 +112,18 @@ def parse(String description)
 	def map = createEvent(zwaveEvent(zwave.parse(description, [0x42:1, 0x43:2, 0x31: 3])))
 	if (!map) {
 		return null
+	}
+
+	if (map.name == "thermostatFanMode"){
+		if (map.value == "fanAuto") {
+        	sendEvent(name: "currentfanMode", value: "Auto Mode" as String)
+	    }
+	    if (map.value == "fanOn") {
+	        	sendEvent(name: "currentfanMode", value: "On Mode" as String)
+		}
+	    if (map.value == "fanCirculate") {
+	        	sendEvent(name: "currentfanMode", value: "Cycle Mode" as String)
+ 	   	}
 	}
 
 	def result = [map]
@@ -147,18 +159,7 @@ def parse(String description)
 		state.lastTriedFanMode = map.value
 	}
 
-	if (map.name == "thermostatFanMode"){
-//		sendEvent(name: "currentfanMode", value: "${map.value}" as String)
-		if (map.value == "fanAuto") {
-        	sendEvent(name: "currentfanMode", value: "Auto Mode" as String)
-	    }
-	    if (map.value == "fanOn") {
-	        	sendEvent(name: "currentfanMode", value: "On Mode" as String)
-		}
-	    if (map.value == "fanCirculate") {
-	        	sendEvent(name: "currentfanMode", value: "Cycle Mode" as String)
- 	   	}
-}
+
 	log.debug "Parse returned $result"
 	result
 }
