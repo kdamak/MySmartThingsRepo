@@ -55,7 +55,7 @@
 
 metadata {
 
-	definition (name: "My Home Energy Monitor - AEON HEMv1", namespace: "jscgs350", author: "Barry A. Burke") 
+	definition (name: "My Aeon Home Energy Monitor v1", namespace: "jscgs350", author: "Barry A. Burke") 
     {
         capability "Energy Meter"
         capability "Power Meter"
@@ -83,19 +83,6 @@ metadata {
 // v2        fingerprint deviceId: "0x3101", inClusters: "0x70,0x32,0x60,0x85,0x56,0x72,0x86"
     }
 
-// simulator metadata
-
-	simulator {
-        for (int i = 0; i <= 10000; i += 1000) {
-            status "power  ${i} W": new physicalgraph.zwave.Zwave().meterV1.meterReport(
-                scaledMeterValue: i, precision: 3, meterType: 33, scale: 2, size: 4).incomingMessage()
-        }
-        for (int i = 0; i <= 100; i += 10) {
-            status "energy  ${i} kWh": new physicalgraph.zwave.Zwave().meterV1.meterReport(
-                scaledMeterValue: i, precision: 3, meterType: 33, scale: 0, size: 4).incomingMessage()
-        }
-    }
-
 // tile definitions
     
     tiles {
@@ -103,17 +90,7 @@ metadata {
 // Watts row
 
         valueTile("powerDisp", "device.powerDisp", inactiveLabel: false, decoration: "flat") {
-            state ("default", label:'${currentValue}', 
-                backgroundColors:[
-                    [value: "0 Watts",      color: "#153591"],
-                    [value: "500 Watts",   color: "#1e9cbb"],
-                    [value: "1000 Watts",   color: "#90d2a7"],
-                    [value: "1500 Watts",   color: "#44b621"],
-                    [value: "2000 Watts",  color: "#f1d801"],
-                    [value: "2500 Watts",  color: "#d04e00"], 
-                    [value: "3000 Watts",  color: "#bc2323"] 
-                 ]
-            )
+            state ("default", label:'${currentValue}')
         }
         
         valueTile("powerOne", "device.powerOne", inactiveLabel: false, decoration: "flat") {
@@ -131,19 +108,20 @@ metadata {
         }
         
         valueTile("energyOne", "device.energyOne", inactiveLabel: false, decoration: "flat") {
-            state("default", label: '${currentValue}', backgroundColor:"#ffffff")
+            state("default", label: '${currentValue}', backgroundColor:"#c3cb71")
         }        
         
         valueTile("energyTwo", "device.energyTwo", inactiveLabel: false, decoration: "flat") {
-            state("default", label: '${currentValue}', backgroundColor:"#ffffff")
+            state("default", label: '${currentValue}', backgroundColor:"#7FE45E")
         }
         
 // Controls row
     
-        standardTile("reset", "device.energy", inactiveLabel: false) {
-            state "default", label:'reset', action:"reset", icon: "st.Health & Wellness.health7"
-        }
-        standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat" ) {
+
+        standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
+			state "default", label:'Reset', action:"reset", icon:"st.secondary.refresh-icon"
+		}
+        standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat") {
             state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
         }
         standardTile("configure", "device.power", inactiveLabel: false, decoration: "flat") {
@@ -156,8 +134,8 @@ metadata {
 
 // TODO: Add configurable delay button - Cycle through 10s, 30s, 1m, 5m, 60m, off?
 
-        main (["powerDisp","energyDisp"])
-        details(["powerOne","powerDisp","powerTwo","energyOne","energyDisp","energyTwo","reset","refresh", "configure"])
+        main (["powerDisp"])
+        details(["powerOne","powerDisp","powerTwo","reset","refresh", "configure"])
     	}
     
         preferences {
@@ -208,16 +186,16 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
         else if (cmd.scale==2) {                
             newValue = Math.round( cmd.scaledMeterValue )       // really not worth the hassle to show decimals for Watts
             if (newValue != state.powerValue) {
-                dispValue = newValue+"\nWatts"
+                dispValue = newValue+"w"
                 sendEvent(name: "powerDisp", value: dispValue as String, unit: "")
                 
                 if (newValue < state.powerLow) {
-                    dispValue = "Low\n"+newValue+" W\n"+timeString
+                    dispValue = "Low: "+newValue+"w" //+timeString
                     sendEvent(name: "powerOne", value: dispValue as String, unit: "")
                     state.powerLow = newValue
                 }
                 if (newValue > state.powerHigh) {
-                    dispValue = "High\n"+newValue+" W\n"+timeString
+                    dispValue = "High: "+newValue+"w" //+timeString
                     sendEvent(name: "powerTwo", value: dispValue as String, unit: "")
                     state.powerHigh = newValue
                 }
@@ -226,6 +204,21 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
             }
         }
     }
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
+    def map = [:]
+    map.name = "battery"
+    map.unit = "%"
+    if (cmd.batteryLevel == 0xFF) {
+        map.value = 1
+        map.descriptionText = "${device.displayName} has a low battery"
+        map.isStateChange = true
+    } else {
+        map.value = cmd.batteryLevel
+    }
+    log.debug map
+    return map
 }
 
 def zwaveEvent(physicalgraph.zwave.Command cmd) {
