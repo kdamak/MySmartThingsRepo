@@ -1,237 +1,283 @@
+/**
+ *  Aeon HEMv2
+ *
+ *  Copyright 2014 Barry A. Burke
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *
+ *  Aeon Home Energy Meter v2 (US)
+ *
+ *  Author: Barry A. Burke
+ *  Contributors: Brock Haymond: UI updates
+ *
+ *  Genesys: Based off of Aeon Smart Meter Code sample provided by SmartThings (2013-05-30). Built on US model
+ *           may also work on international versions (currently reports total values only)
+ *
+ *  History:
+ *      
+ *  2014-06-13: Massive OverHaul
+ *              - Fixed Configuration (original had byte order of bitstrings backwards
+ *              - Increased reporting frequency to 10s - note that values won't report unless they change
+ *                (they will also report if they exceed limits defined in the settings - currently just using
+ *                the defaults).
+ *              - Added support for Volts & Amps monitoring (was only Power and Energy)
+ *              - Added flexible tile display. Currently only used to show High and Low values since last
+ *                reset (with time stamps). 
+ *              - All tiles are attributes, so that their values are preserved when you're not 'watching' the
+ *                meter display
+ *              - Values are formatted to Strings in zwaveEvent parser so that we don't lose decimal values 
+ *                in the tile label display conversion
+ *              - Updated fingerprint to match Aeon Home Energy Monitor v2 deviceId & clusters
+ *              - Added colors for Watts and Amps display
+ *              - Changed time format to 24 hour
+ *  2014-06-17: Tile Tweaks
+ *              - Reworked "decorations:" - current values are no longer "flat"
+ *              - Added colors to current Watts (0-18000) & Amps (0-150)
+ *              - Changed all colors to use same blue-green-orange-red as standard ST temperature guages
+ *  2014-06-18: Cost calculations
+ *              - Added $/kWh preference
+ *  2014-09-07: Bug fix & Cleanup
+ *              - Fixed "Unexpected Error" on Refresh tile - (added Refresh Capability)
+ *              - Cleaned up low values - reset to ridiculously high value instead of null
+ *              - Added poll() command/capability (just does a refresh)
+ *              
+ *  2014-09-19   GUI Tweaks, HEM v1 alterations (from Brock Haymond)
+ *              - Reworked all tiles for look, color, text formatting, & readability
+ */
+
 metadata {
-	// Automatically generated. Make future change here.
-	definition (name: "My GE Fan Control Switch", namespace: "jscgs350", author: "SmartThings") {
-		capability "Switch Level"
-		capability "Actuator"
-		capability "Indicator"
-		capability "Switch"
-		capability "Polling"
-		capability "Refresh"
-		capability "Sensor"
+
+	definition (name: "My Aeon Home Energy Monitor v1", namespace: "jscgs350", author: "Barry A. Burke") 
+    {
+        capability "Energy Meter"
+        capability "Power Meter"
+        capability "Configuration"
+        capability "Sensor"
+        capability "Refresh"
+        capability "Polling"
+        capability "Battery"
         
-        command "lowSpeed"
-        command "medSpeed"
-        command "highSpeed"
+        attribute "energy", "string"
+        attribute "energyDisp", "string"
+        attribute "energyOne", "string"
+        attribute "energyTwo", "string"
+        
+        attribute "power", "string"
+        attribute "powerDisp", "string"
+        attribute "powerOne", "string"
+        attribute "powerTwo", "string"
+        
+        command "reset"
+        command "configure"
+        
+        fingerprint deviceId: "0x2101", inClusters: " 0x70,0x31,0x72,0x86,0x32,0x80,0x85,0x60"
 
-		attribute "currentSpeed", "string"
+// v2        fingerprint deviceId: "0x3101", inClusters: "0x70,0x32,0x60,0x85,0x56,0x72,0x86"
+    }
 
-//		fingerprint inClusters: "0x26"
-	}
+// tile definitions
+    
+    tiles {
+    
+// Watts row
 
-	tiles {
-		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
-			state "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#79b821"
-			state "off", label:'${name}', action:"switch.on", icon:"st.switches.switch.off", backgroundColor:"#ffffff"
-//			state "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
-//			state "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
-		}
-		standardTile("indicator", "device.indicatorStatus", inactiveLabel: false, decoration: "flat") {
-			state "when off", action:"indicator.indicatorWhenOn", icon:"st.indicators.lit-when-off"
-			state "when on", action:"indicator.indicatorNever", icon:"st.indicators.lit-when-on"
-			state "never", action:"indicator.indicatorWhenOff", icon:"st.indicators.never-lit"
-		}
-		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
-			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
-		}
-		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 3, inactiveLabel: false) {
-			state "level", action:"switch level.setLevel"
-		}
-        valueTile("currentSpeed", "device.currentSpeed", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+        valueTile("powerDisp", "device.powerDisp", inactiveLabel: false, decoration: "flat") {
             state ("default", label:'${currentValue}')
         }
-
-//Speed control row
-        standardTile("lowSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
-            state "lowSpeed", label:'LOW', action:"lowSpeed", icon:"st.Home.home30"
+        
+        valueTile("powerOne", "device.powerOne", inactiveLabel: false, decoration: "flat") {
+            state("default", label:'${currentValue}')
         }
-        standardTile("medSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
-            state "medSpeed", label:'MED', action:"medSpeed", icon:"st.Home.home30"
-        }
-        standardTile("highSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
-            state "highSpeed", label:'HIGH', action:"highSpeed", icon:"st.Home.home30"
+        
+        valueTile("powerTwo", "device.powerTwo", inactiveLabel: false, decoration: "flat") {
+            state("default", label:'${currentValue}')
         }
 
-		main(["switch"])
-		details(["switch", "currentSpeed", "indicator", "lowSpeed", "medSpeed", "highSpeed", "refresh"])
-	}
+// Power row
+    
+        valueTile("energyDisp", "device.energyDisp", inactiveLabel: false, decoration: "flat") {
+            state("default", label: '${currentValue}', backgroundColor:"#ffffff")
+        }
+        
+        valueTile("energyOne", "device.energyOne", inactiveLabel: false, decoration: "flat") {
+            state("default", label: '${currentValue}', backgroundColor:"#c3cb71")
+        }        
+        
+        valueTile("energyTwo", "device.energyTwo", inactiveLabel: false, decoration: "flat") {
+            state("default", label: '${currentValue}', backgroundColor:"#7FE45E")
+        }
+        
+// Controls row
+    
+
+        standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
+			state "default", label:'Reset', action:"reset", icon:"st.secondary.refresh-icon"
+		}
+        standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+        }
+        standardTile("configure", "device.power", inactiveLabel: false, decoration: "flat") {
+            state "configure", label:'', action:"configure", icon:"st.secondary.configure"
+        }
+        valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
+            state "battery", label:'${currentValue}% battery', unit:""
+        }
+
+
+// TODO: Add configurable delay button - Cycle through 10s, 30s, 1m, 5m, 60m, off?
+
+        main (["powerDisp"])
+        details(["powerOne","powerDisp","powerTwo","reset","refresh", "configure"])
+    	}
+    
+        preferences {
+            input "kWhCost", "string", title: "\$/kWh (0.16)", defaultValue: "0.16" as String
+        }
 }
+
 
 def parse(String description) {
-	def item1 = [
-		canBeCurrentState: false,
-		linkText: getLinkText(device),
-		isStateChange: false,
-		displayed: false,
-		descriptionText: description,
-		value:  description
-	]
-	def result
-	def cmd = zwave.parse(description, [0x20: 1, 0x26: 1, 0x70: 1])
-	if (cmd) {
-		result = createEvent(cmd, item1)
-	}
-	else {
-		item1.displayed = displayed(description, item1.isStateChange)
-		result = [item1]
-	}
-	log.debug "Parse returned ${result?.descriptionText}"
-	result
-}
-
-def createEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd, Map item1) {
-	def result = doCreateEvent(cmd, item1)
-	for (int i = 0; i < result.size(); i++) {
-		result[i].type = "physical"
-	}
-	result
-}
-
-def createEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd, Map item1) {
-	def result = doCreateEvent(cmd, item1)
-	for (int i = 0; i < result.size(); i++) {
-		result[i].type = "physical"
-	}
-	result
-}
-
-def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelStartLevelChange cmd, Map item1) {
-	[]
-}
-
-def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelStopLevelChange cmd, Map item1) {
-	[response(zwave.basicV1.basicGet())]
-}
-
-def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelSet cmd, Map item1) {
-	def result = doCreateEvent(cmd, item1)
-	for (int i = 0; i < result.size(); i++) {
-		result[i].type = "physical"
-	}
-	result
-}
-
-def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelReport cmd, Map item1) {
-	def result = doCreateEvent(cmd, item1)
-	result[0].descriptionText = "${item1.linkText} is ${item1.value}"
-	result[0].handlerName = cmd.value ? "statusOn" : "statusOff"
-	for (int i = 0; i < result.size(); i++) {
-		result[i].type = "digital"
-	}
-	result
-}
-
-def doCreateEvent(physicalgraph.zwave.Command cmd, Map item1) {
-	def result = [item1]
-
-	item1.name = "switch"
-	item1.value = cmd.value ? "on" : "off"
-    if (item1.value == "off") {
-     	sendEvent(name: "currentSpeed", value: "OFF" as String)
+    log.debug "Parse received ${description}"
+    def result = null
+    def cmd = zwave.parse(description, [0x31: 1, 0x32: 1, 0x60: 3])
+    if (cmd) {
+        result = createEvent(zwaveEvent(cmd))
     }
-	item1.handlerName = item1.value
-	item1.descriptionText = "${item1.linkText} was turned ${item1.value}"
-	item1.canBeCurrentState = true
-	item1.isStateChange = isStateChange(device, item1.name, item1.value)
-	item1.displayed = item1.isStateChange
+    if (result) log.debug "Parse returned ${result}"
+    return result
+}
 
-	if (cmd.value >= 5) {
-		def item2 = new LinkedHashMap(item1)
-		item2.name = "level"
-		item2.value = cmd.value as String
-		item2.unit = "%"
-		item2.descriptionText = "${item1.linkText} dimmed ${item2.value} %"
-		item2.canBeCurrentState = true
-		item2.isStateChange = isStateChange(device, item2.name, item2.value)
-		item2.displayed = false
-        if (item2.value == "30") {
-        	sendEvent(name: "currentSpeed", value: "LOW" as String)
+def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
+    log.debug "zwaveEvent received ${cmd}"
+    
+    def dispValue
+    def newValue
+    def timeString = new Date().format("h:mm a", location.timeZone)
+    
+    if (cmd.meterType == 33) {
+        if (cmd.scale == 0) {
+            newValue = cmd.scaledMeterValue
+            if (newValue != state.energyValue) {
+                dispValue = String.format("%5.2f",newValue)+"\nkWh"
+                sendEvent(name: "energyDisp", value: dispValue as String, unit: "")
+                state.energyValue = newValue
+                BigDecimal costDecimal = newValue * ( kWhCost as BigDecimal)
+                def costDisplay = String.format("%3.2f",costDecimal)
+                sendEvent(name: "energyTwo", value: "Cost\n\$${costDisplay}", unit: "")
+                [name: "energy", value: newValue, unit: "kWh"]
+            }
+        } else if (cmd.scale == 1) {
+            newValue = cmd.scaledMeterValue
+            if (newValue != state.energyValue) {
+                dispValue = String.format("%5.2f",newValue)+"\nkVAh"
+                sendEvent(name: "energyDisp", value: dispValue as String, unit: "")
+                state.energyValue = newValue
+                [name: "energy", value: newValue, unit: "kVAh"]
+            }
         }
-        if (item2.value == "62") {
-        	sendEvent(name: "currentSpeed", value: "MEDIUM" as String)
+        else if (cmd.scale==2) {                
+            newValue = Math.round( cmd.scaledMeterValue )       // really not worth the hassle to show decimals for Watts
+            if (newValue != state.powerValue) {
+                dispValue = newValue+"w"
+                sendEvent(name: "powerDisp", value: dispValue as String, unit: "")
+                
+                if (newValue < state.powerLow) {
+                    dispValue = "Low: "+newValue+"w" //+timeString
+                    sendEvent(name: "powerOne", value: dispValue as String, unit: "")
+                    state.powerLow = newValue
+                }
+                if (newValue > state.powerHigh) {
+                    dispValue = "High: "+newValue+"w" //+timeString
+                    sendEvent(name: "powerTwo", value: dispValue as String, unit: "")
+                    state.powerHigh = newValue
+                }
+                state.powerValue = newValue
+                [name: "power", value: newValue, unit: "W"]
+            }
         }
-        if (item2.value == "99") {
-        	sendEvent(name: "currentSpeed", value: "HIGH" as String)
-        }        
-		result << item2
-	}
-	result
+    }
 }
 
-def zwaveEvent(physicalgraph.zwave.commands.configurationv1.ConfigurationReport cmd) {
-	def value = "when off"
-	if (cmd.configurationValue[0] == 1) {value = "when on"}
-	if (cmd.configurationValue[0] == 2) {value = "never"}
-	[name: "indicatorStatus", value: value, display: false]
+def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
+    def map = [:]
+    map.name = "battery"
+    map.unit = "%"
+    if (cmd.batteryLevel == 0xFF) {
+        map.value = 1
+        map.descriptionText = "${device.displayName} has a low battery"
+        map.isStateChange = true
+    } else {
+        map.value = cmd.batteryLevel
+    }
+    log.debug map
+    return map
 }
 
-def createEvent(physicalgraph.zwave.Command cmd,  Map map) {
-	// Handles any Z-Wave commands we aren't interested in
-	log.debug "UNHANDLED COMMAND $cmd"
-}
-
-def on() {
-	log.info "on"
-	delayBetween([zwave.basicV1.basicSet(value: 0xFF).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
-}
-
-def off() {
-	delayBetween ([zwave.basicV1.basicSet(value: 0x00).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
-}
-
-def setLevel(value) {
-    def level = Math.min(value as Integer, 99)
-	delayBetween ([zwave.basicV1.basicSet(value: level).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
-}
-
-def setLevel(value, duration) {
-    def level = Math.min(value as Integer, 99)
-	def dimmingDuration = duration < 128 ? duration : 128 + Math.round(duration / 60)
-	zwave.switchMultilevelV2.switchMultilevelSet(value: level, dimmingDuration: dimmingDuration).format()
-}
-
-def lowSpeed() {
-	log.debug "Low speed settings"
-    delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
-}
-
-def medSpeed() {
-	log.debug "Medium speed settings"
-    delayBetween ([zwave.basicV1.basicSet(value: 62).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
-}
-
-def highSpeed() {
-	log.debug "High speed settings"
-    delayBetween ([zwave.basicV1.basicSet(value: 99).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
-}
-
-def poll() {
-	zwave.switchMultilevelV1.switchMultilevelGet().format()
+def zwaveEvent(physicalgraph.zwave.Command cmd) {
+    // Handles all Z-Wave commands we aren't interested in
+    log.debug "Unhandled event ${cmd}"
+    [:]
 }
 
 def refresh() {
-	zwave.switchMultilevelV1.switchMultilevelGet().format()
+    delayBetween([
+        zwave.meterV2.meterGet(scale: 0).format(),
+        zwave.meterV2.meterGet(scale: 2).format()
+    ])
 }
 
-def indicatorWhenOn() {
-	sendEvent(name: "indicatorStatus", value: "when on", display: false)
-	zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 3, size: 1).format()
+def poll() {
+    refresh()
+}
+    
+def reset() {
+    log.debug "${device.name} reset"
+
+    state.powerHigh = 0
+    state.powerLow = 99999
+    
+    def dateString = new Date().format("m/d/YY", location.timeZone)
+    def timeString = new Date().format("h:mm a", location.timeZone)
+    sendEvent(name: "energyOne", value: "Since\n"+dateString+"\n"+timeString, unit: "")
+    sendEvent(name: "powerOne", value: "", unit: "")    
+    sendEvent(name: "powerDisp", value: "", unit: "")    
+    sendEvent(name: "energyDisp", value: "", unit: "")
+    sendEvent(name: "energyTwo", value: "Cost\n--", unit: "")
+    sendEvent(name: "powerTwo", value: "", unit: "")    
+    
+// No V1 available
+    def cmd = delayBetween( [
+        zwave.meterV2.meterReset().format(),
+        zwave.meterV2.meterGet(scale: 0).format()
+    ])
+    
+    cmd
 }
 
-def indicatorWhenOff() {
-	sendEvent(name: "indicatorStatus", value: "when off", display: false)
-	zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 3, size: 1).format()
-}
+def configure() {
+    // TODO: Turn on reporting for each leg of power - display as alternate view (Currently those values are
+    //       returned as zwaveEvents...they probably aren't implemented in the core Meter device yet.
 
-def indicatorNever() {
-	sendEvent(name: "indicatorStatus", value: "never", display: false)
-	zwave.configurationV1.configurationSet(configurationValue: [2], parameterNumber: 3, size: 1).format()
-}
+    def cmd = delayBetween([
+        zwave.configurationV1.configurationSet(parameterNumber: 3, size: 1, scaledConfigurationValue: 1).format(),      // Enable selective reporting
+        zwave.configurationV1.configurationSet(parameterNumber: 4, size: 2, scaledConfigurationValue: 50).format(),     // Don't send unless watts have increased by 50
+        zwave.configurationV1.configurationSet(parameterNumber: 8, size: 2, scaledConfigurationValue: 10).format(),     // Or by 10% (these 3 are the default values
+        zwave.configurationV1.configurationSet(parameterNumber: 101, size: 4, scaledConfigurationValue: 10).format(),   // Average Watts & Amps
+        zwave.configurationV1.configurationSet(parameterNumber: 111, size: 4, scaledConfigurationValue: 30).format(),   // Every 30 Seconds
+        zwave.configurationV1.configurationSet(parameterNumber: 102, size: 4, scaledConfigurationValue: 4).format(),    // Average Voltage
+        zwave.configurationV1.configurationSet(parameterNumber: 112, size: 4, scaledConfigurationValue: 150).format(),  // every 2.5 minute
+        zwave.configurationV1.configurationSet(parameterNumber: 103, size: 4, scaledConfigurationValue: 1).format(),    // Total kWh (cumulative)
+        zwave.configurationV1.configurationSet(parameterNumber: 113, size: 4, scaledConfigurationValue: 300).format()   // every 5 minutes
+    ])
+    log.debug cmd
 
-def invertSwitch(invert=true) {
-	if (invert) {
-		zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 4, size: 1).format()
-	}
-	else {
-		zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 4, size: 1).format()
-	}
+    cmd
 }
