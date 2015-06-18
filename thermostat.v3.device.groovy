@@ -1,9 +1,11 @@
 /*
-** This device type can be used with any typical zwave thermostat.  If used with an Evolve T100R, just enable cycler mode on the thermo itself.
+** This device type can be used with any typical zwave thermostat with little, if any, modifications.  It was modeled after the default ST device type.
+** If used with an Evolve T100R, just enable cycler mode on the thermo under advanced settings to allow ** the Circulate tile to work, otherwise 
+** you'll just be able to only use Fan Auto and Fan On.
 */
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Thermostat v3 - 1st Floor", namespace: "jscgs350", author: "jsconst@gmail.com")
+	definition (name: "My Thermostat v3 - 1st Floor", namespace: "jscgs350", author: "jscgs350")
     {
 		capability "Refresh"
 		capability "Actuator"
@@ -40,7 +42,7 @@ metadata {
 	tiles
     {
 		valueTile("temperature", "device.temperature", width: 2, height: 2) {
-			state("temperature", label:'1st Floor\n${currentValue}°', unit:"F",
+			state("temperature", label:'${currentValue}°', unit:"F",
 				backgroundColors:[
 					[value: 31, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
