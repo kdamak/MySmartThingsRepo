@@ -134,8 +134,8 @@ metadata {
 
 // TODO: Add configurable delay button - Cycle through 10s, 30s, 1m, 5m, 60m, off?
 
-        main (["powerDisp"])
-        details(["powerOne","powerDisp","powerTwo","reset","refresh", "configure"])
+        main (["power"])
+    	details(["powerOne","powerDisp","powerTwo","reset","refresh", "configure"])
     	}
     
         preferences {
