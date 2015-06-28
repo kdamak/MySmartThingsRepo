@@ -220,9 +220,9 @@ def configure() {
 	log.debug "Executing Configure per user request"
 	def cmd = delayBetween([
 		zwave.configurationV1.configurationSet(configurationValue: [zstepNumber], parameterNumber: 7, size: 1).format(), // Z-Wave Dim Command number of steps or levels (default=1)
-        zwave.configurationV1.configurationSet(configurationValue: [30], parameterNumber: 8, size: 1).format(), // Z-Wave Dim Command timing of the steps (default=3)
+        zwave.configurationV1.configurationSet(configurationValue: [zstepTiming], parameterNumber: 8, size: 1).format(), // Z-Wave Dim Command timing of the steps (default=3)
         zwave.configurationV1.configurationSet(configurationValue: [mstepNumber], parameterNumber: 9, size: 1).format(), // Manual Control Dimming number of steps or levels (default=1)
-        zwave.configurationV1.configurationSet(configurationValue: [30], parameterNumber: 10, size: 1).format() // Manual Control Dimming timing of the steps (default=3)
+        zwave.configurationV1.configurationSet(configurationValue: [mstepTiming], parameterNumber: 10, size: 1).format() // Manual Control Dimming timing of the steps (default=3)
 	],2000)
     log.debug "Executed : zwave.configurationV1.configurationSet(configurationValue: [${zstepNumber}], parameterNumber: 7, size: 1).format()"
 	log.debug "Executed : zwave.configurationV1.configurationSet(configurationValue: [${zstepTiming}], parameterNumber: 8, size: 1).format()"
