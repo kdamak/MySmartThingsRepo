@@ -6,14 +6,14 @@
  metadata {
 
 
-	definition (name: "My PSM01 Sensor - Kitchen Refrigerator", namespace: "jscgs350", author: "SmartThings/Paul Spee") {
+	definition (name: "My PSM01 Sensor", namespace: "jscgs350", author: "SmartThings/Paul Spee") {
 		capability "Contact Sensor"
 		capability "Temperature Measurement"
 		capability "Illuminance Measurement"
 		capability "Configuration"
 		capability "Sensor"
 		capability "Battery"
-        	capability "Refresh"
+        capability "Refresh"
 		capability "Polling"
 
 		fingerprint deviceId: "0x2001", inClusters: "0x30,0x31,0x80,0x84,0x70,0x85,0x72,0x86"
@@ -21,15 +21,10 @@
 
 	tiles {
 
-//		standardTile("contact", "device.contact", width: 2, height: 2) {
-//            state "close", label:'closed', icon:"st.contact.contact.closed", backgroundColor:"#79b821"
-//            state "open", label:'open', icon:"st.contact.contact.open", backgroundColor:"#ffa81e"
-//        }
-		standardTile("contact", "device.contact", width: 2, height: 2) {
-			state "close", label: 'Frig Closed', icon: "st.fridge.fridge-closed", backgroundColor: "#ffffff"
-			state "open", label: 'Frig Open', icon: "st.fridge.fridge-open", backgroundColor: "#ffa81e"
+		valueTile("contact", "device.contact", width: 2, height: 2) {
+			state "closed", label: 'Closed', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+			state "open", label: 'Open', icon: "st.contact.contact.open", backgroundColor: "#ffa81e"
 		}
-
 
 		valueTile("temperature", "device.temperature", inactiveLabel: false) {
 			state "temperature", label:'${currentValue}°',
@@ -62,7 +57,13 @@
 
 		main(["contact", "temperature", "illuminance"])
 		details(["contact", "temperature", "illuminance", "battery", "configure", "refresh"])
-	}
+		}
+
+		preferences {
+			input description: "This feature allows you to correct any temperature variations by selecting an offset. Ex: If your sensor consistently reports a temp that's 5 degrees too warm, you'd enter \"-5\". If 3 degrees too cold, enter \"+3\".", displayDuringSetup: false, type: "paragraph", element: "paragraph"
+			input "tempOffset", "number", title: "Temperature Offset", description: "Adjust temperature by this many degrees", range: "*..*", displayDuringSetup: false
+		}
+
 }
 
 preferences {
@@ -82,18 +83,18 @@ def updated() {
 // parse() with a Map argument is called after a sendEvent(device)
 // In this case, we are receiving an event from the PSM01 Helper App to generate a "inactive" event
 def parse(Map evt){
-	log.debug "Parse(Map) called with map ${evt}"
+//	log.debug "Parse(Map) called with map ${evt}"
     def result = [];
     if (evt)
     	result << evt;
-    log.debug "Parse(Map) returned ${result}"
+//    log.debug "Parse(Map) returned ${result}"
     return result
 }
 
 // Parse incoming device messages to generate events
 def parse(String description)
 {
-    log.debug "Parse called with ${description}"
+//    log.debug "Parse called with ${description}"
 	def result = []
 	def cmd = zwave.parse(description, [0x20: 1, 0x31: 2, 0x30: 2, 0x80: 1, 0x84: 2, 0x85: 2])
 	if (cmd) {
@@ -121,6 +122,12 @@ def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv2.SensorMultilevelR
 			map.value = convertTemperatureIfNeeded(cmd.scaledSensorValue, cmdScale, cmd.precision)
 			map.unit = getTemperatureScale()
 			map.name = "temperature"
+            if (tempOffset) {
+				def offset = tempOffset as int
+				def v = map.value as int
+				map.value = v + offset
+			}
+            log.debug "Adjusted temp value ${map.value}"
 			break;
 		case 3:
 			// luminance
@@ -151,7 +158,7 @@ def zwaveEvent(physicalgraph.zwave.commands.sensorbinaryv2.SensorBinaryReport cm
                 map.value = "open"
                 map.descriptionText = "$device.displayName is open"
             } else {
-                map.value = "close"
+                map.value = "closed"
                 map.descriptionText = "$device.displayName is closed"
             }
             break;
@@ -173,8 +180,8 @@ def configure() {
 		zwave.configurationV1.configurationSet(parameterNumber: 10, size: 1, scaledConfigurationValue: 4).format(), // Auto report Battery time 1-127, default 12
 		zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, scaledConfigurationValue: 2).format(), // Auto report Door/Window state time 1-127, default 12
 		zwave.configurationV1.configurationSet(parameterNumber: 12, size: 1, scaledConfigurationValue: 2).format(), // Auto report Illumination time 1-127, default 12
-        	zwave.configurationV1.configurationSet(parameterNumber: 13, size: 1, scaledConfigurationValue: 2).format(), // Auto report Temperature time 1-127, default 12
-        	zwave.wakeUpV1.wakeUpIntervalSet(seconds: 1 * 3600, nodeid:zwaveHubNodeId).format(),						// Wake up every hour
+        zwave.configurationV1.configurationSet(parameterNumber: 13, size: 1, scaledConfigurationValue: 2).format(), // Auto report Temperature time 1-127, default 12
+        zwave.wakeUpV1.wakeUpIntervalSet(seconds: 1 * 3600, nodeid:zwaveHubNodeId).format(),						// Wake up every hour
 
     ])
 }
