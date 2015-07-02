@@ -15,7 +15,7 @@ metadata {
 
 		attribute "currentSpeed", "string"
 
-		fingerprint inClusters: "0x26"
+//		fingerprint inClusters: "0x26"
 	}
 
 	tiles {
