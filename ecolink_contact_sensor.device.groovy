@@ -29,7 +29,7 @@ metadata {
 
 	// UI tile definitions
 	tiles {
-		standardTile("contact", "device.contact", width: 2, height: 2) {
+		standardTile("contact", "device.contact", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
 			state "open", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#ffa81e"
 			state "closed", label: '${name}', icon: "st.Home.home9-icn", backgroundColor: "#79b821"
 		}
