@@ -1,6 +1,5 @@
 /**
  *  Device type just used for changing device icons to what ever you want.  Once changed, go back to using ST's default device type.
- * 
  */
 metadata {
 	definition (name: "My Device Icon Modifier", namespace: "jscgs350", author: "smarththings") {
