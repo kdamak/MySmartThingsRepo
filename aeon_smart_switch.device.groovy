@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Z-Wave Metering Switch - Aeon", namespace: "jscgs350", author: "SmartThings") {
+	definition (name: "My Aeon Metering Switch", namespace: "jscgs350", author: "SmartThings") {
 		capability "Energy Meter"
 		capability "Actuator"
 		capability "Switch"
@@ -24,37 +24,45 @@ metadata {
 
 
 	// tile definitions
-	tiles {
+/*	tiles {
 		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
 			state "on", label: '${name}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821"
 			state "off", label: '${name}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
 		}
+*/
+	tiles(scale: 2) {
+		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true){
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label: '${name}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821"
+				attributeState "off", label: '${name}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
+			}
+		}
 
 // Watts row
 
-        valueTile("powerDisp", "device.powerDisp", inactiveLabel: false, decoration: "flat") {
-            state ("default", label:'${currentValue}', backgroundColor:"#81D8D0")
+        valueTile("powerDisp", "device.powerDisp", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state ("default", label:'${currentValue}')
         }
         
-        valueTile("powerOne", "device.powerOne", inactiveLabel: false, decoration: "flat") {
-            state("default", label:'${currentValue}', backgroundColor:"#c3cb71")
+        valueTile("powerOne", "device.powerOne", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state("default", label:'${currentValue}')
         }
         
-        valueTile("powerTwo", "device.powerTwo", inactiveLabel: false, decoration: "flat") {
-            state("default", label:'${currentValue}', backgroundColor:"#e0301e")
+        valueTile("powerTwo", "device.powerTwo", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state("default", label:'${currentValue}')
         }
 //
 
-		valueTile("energy", "device.energy", decoration: "flat") {
+		valueTile("energy", "device.energy", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'${currentValue} kWh'
 		}
-		standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'Reset', action:"reset"
+        standardTile("reset", "device.energy", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'Reset', action:"reset", icon:"st.secondary.refresh-icon"
 		}
-		standardTile("configure", "device.power", inactiveLabel: false, decoration: "flat") {
+		standardTile("configure", "device.power", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
-		standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat") {
+		standardTile("refresh", "device.power", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
 
@@ -62,8 +70,11 @@ metadata {
 //        details(["powerOne","powerDisp","powerTwo","reset","refresh", "configure"])
 //    	}
 
+//		main "switch"
+//		details(["switch","energy","refresh","powerOne","powerDisp","powerTwo","reset","configure"])
+
 		main "switch"
-		details(["switch","energy","refresh","powerOne","powerDisp","powerTwo","reset","configure"])
+		details(["switch","powerOne","powerDisp","powerTwo","refresh","reset","configure"])
 	}
 }
 
@@ -89,16 +100,16 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
 	else {
             newValue = Math.round( cmd.scaledMeterValue )       // really not worth the hassle to show decimals for Watts
             if (newValue != state.powerValue) {
-                dispValue = newValue+"\nWatts"
+                dispValue = newValue+"w"
                 sendEvent(name: "powerDisp", value: dispValue as String, unit: "")
                 
                 if (newValue < state.powerLow) {
-                    dispValue = "Low\n"+newValue+" W\n"+timeString
+                    dispValue = "Low: "+newValue+"w" //+timeString
                     sendEvent(name: "powerOne", value: dispValue as String, unit: "")
                     state.powerLow = newValue
                 }
                 if (newValue > state.powerHigh) {
-                    dispValue = "High\n"+newValue+" W\n"+timeString
+                    dispValue = "High: "+newValue+"w" //+timeString
                     sendEvent(name: "powerTwo", value: dispValue as String, unit: "")
                     state.powerHigh = newValue
                 }
