@@ -3,22 +3,19 @@
  * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
  *  Author: Many ST community members
- *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04, 2015-02-16
+ *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
  */
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v2", namespace: "jscgs350", author: "jscgs350") {
 		capability "Alarm"
         capability "Momentary"
-	capability "Polling"
+		capability "Polling"
         capability "Refresh"
         capability "Switch"
         capability "Contact Sensor"
         capability "Configuration"
         attribute "power", "string"
-
-	fingerprint deviceId:"0x1000", inClusters:"0x72, 0x86, 0x71, 0x30, 0x31, 0x35, 0x70, 0x85, 0x25, 0x03"
-
 	}
 
 	// tile definitions
@@ -48,8 +45,10 @@ def parse(String description) {
 
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
+        log.debug "MIMOLite is: ${power}"
     } else {
     	sendEvent(name: "power", value: "alive")
+        log.debug "MIMOLite is: ${power}"
     }
 
 	if (cmd) {
