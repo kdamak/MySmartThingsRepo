@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My GE Fan Control Switch", namespace: "jscgs350", author: "SmartThings") {
+	definition (name: "My Test Fan Controller", namespace: "jscgs350", author: "Craig L.") {
 		capability "Switch Level"
 		capability "Actuator"
 		capability "Indicator"
@@ -8,6 +8,7 @@ metadata {
 		capability "Polling"
 		capability "Refresh"
 		capability "Sensor"
+        //capability "speed"
         
         command "lowSpeed"
         command "medSpeed"
@@ -18,41 +19,54 @@ metadata {
 //		fingerprint inClusters: "0x26"
 	}
 
-	tiles {
-		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
-			state "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#79b821"
-			state "off", label:'${name}', action:"switch.on", icon:"st.switches.switch.off", backgroundColor:"#ffffff"
-//			state "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
-//			state "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
-		}
-		standardTile("indicator", "device.indicatorStatus", inactiveLabel: false, decoration: "flat") {
+	
+  
+    
+     tiles (scale:2) {
+		multiAttributeTile(name: "switch", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+        	tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "onHigh", label:'High', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#407020", nextState: "turningOff"
+            	attributeState "onMed", label:'Med', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#a0d080", nextState: "turningOff"
+            	attributeState "onLow", label:'Low', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#f0f0f0", nextState: "turningOff"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.switches.switch.off", backgroundColor:"#ffffff", nextState: "turningOn"
+				attributeState "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
+				attributeState "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
+			}
+        	
+            tileAttribute ("device.level", key: "VALUE_CONTROL") {
+				attributeState "level", action:"switch level.setLevel"
+			}
+        }
+        
+        
+		standardTile("indicator", "device.indicatorStatus", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "when off", action:"indicator.indicatorWhenOn", icon:"st.indicators.lit-when-off"
 			state "when on", action:"indicator.indicatorNever", icon:"st.indicators.lit-when-on"
 			state "never", action:"indicator.indicatorWhenOff", icon:"st.indicators.never-lit"
 		}
-		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
+		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 3, inactiveLabel: false) {
+		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 6, inactiveLabel: false) {
 			state "level", action:"switch level.setLevel"
 		}
-        valueTile("currentSpeed", "device.currentSpeed", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+        valueTile("currentSpeed", "device.currentSpeed", canChangeIcon: false, inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
             state ("default", label:'${currentValue}')
         }
 
 //Speed control row
-        standardTile("lowSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
+        standardTile("lowSpeed", "device.level", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
             state "lowSpeed", label:'LOW', action:"lowSpeed", icon:"st.Home.home30"
         }
-        standardTile("medSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
+        standardTile("medSpeed", "device.level", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
             state "medSpeed", label:'MED', action:"medSpeed", icon:"st.Home.home30"
         }
-        standardTile("highSpeed", "device.level", inactiveLabel: false, decoration: "flat") {
+        standardTile("highSpeed", "device.level", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
             state "highSpeed", label:'HIGH', action:"highSpeed", icon:"st.Home.home30"
         }
 
 		main(["switch"])
-		details(["switch", "currentSpeed", "indicator", "lowSpeed", "medSpeed", "highSpeed", "refresh"])
+		details(["switch", "lowSpeed", "medSpeed", "highSpeed", "currentSpeed", "refresh", "indicator", "levelSliderControl"])
 	}
 }
 
@@ -83,7 +97,8 @@ def createEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd, Map item1)
 	for (int i = 0; i < result.size(); i++) {
 		result[i].type = "physical"
 	}
-	result
+	log.trace "BasicReport"
+    result
 }
 
 def createEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd, Map item1) {
@@ -91,11 +106,13 @@ def createEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd, Map item1) {
 	for (int i = 0; i < result.size(); i++) {
 		result[i].type = "physical"
 	}
-	result
+	log.trace "BasicSet"
+    result
 }
 
 def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelStartLevelChange cmd, Map item1) {
 	[]
+    	log.trace "StartLevel"
 }
 
 def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelStopLevelChange cmd, Map item1) {
@@ -107,7 +124,8 @@ def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevel
 	for (int i = 0; i < result.size(); i++) {
 		result[i].type = "physical"
 	}
-	result
+	log.trace "SwitchMultiLevelSet"
+    result
 }
 
 def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevelReport cmd, Map item1) {
@@ -117,7 +135,8 @@ def createEvent(physicalgraph.zwave.commands.switchmultilevelv1.SwitchMultilevel
 	for (int i = 0; i < result.size(); i++) {
 		result[i].type = "digital"
 	}
-	result
+	log.trace "SwitchMultilevelReport"
+    result
 }
 
 def doCreateEvent(physicalgraph.zwave.Command cmd, Map item1) {
@@ -125,6 +144,9 @@ def doCreateEvent(physicalgraph.zwave.Command cmd, Map item1) {
 
 	item1.name = "switch"
 	item1.value = cmd.value ? "on" : "off"
+    if (item1.value == "off") {
+     	//sendEvent(name: "currentSpeed", value: "OFF" as String)
+    }
 	item1.handlerName = item1.value
 	item1.descriptionText = "${item1.linkText} was turned ${item1.value}"
 	item1.canBeCurrentState = true
@@ -142,20 +164,30 @@ def doCreateEvent(physicalgraph.zwave.Command cmd, Map item1) {
 		item2.displayed = false
         if (item2.value == "30") {
         	sendEvent(name: "currentSpeed", value: "LOW" as String)
+			sendEvent(name: "switch", value: "onLow" as String)
         }
         if (item2.value == "62") {
         	sendEvent(name: "currentSpeed", value: "MEDIUM" as String)
+			sendEvent(name: "switch", value: "onMed" as String)
         }
         if (item2.value == "99") {
         	sendEvent(name: "currentSpeed", value: "HIGH" as String)
-        }        
+			sendEvent(name: "switch", value: "onHigh" as String)
+        }
+        if (item2.value == "29") {
+        	log.debug "Value is too low"
+            delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
+        
+        }
 		result << item2
 	}
-	result
+	log.trace "doCreateEvent"
+    result
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.configurationv1.ConfigurationReport cmd) {
 	def value = "when off"
+    	log.trace "ConfigurationReport"
 	if (cmd.configurationValue[0] == 1) {value = "when on"}
 	if (cmd.configurationValue[0] == 2) {value = "never"}
 	[name: "indicatorStatus", value: value, display: false]
@@ -168,16 +200,29 @@ def createEvent(physicalgraph.zwave.Command cmd,  Map map) {
 
 def on() {
 	log.info "on"
-	delayBetween([zwave.basicV1.basicSet(value: 0xFF).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
+	delayBetween([zwave.basicV1.basicSet(value: 0xFF).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
 }
 
 def off() {
-	delayBetween ([zwave.basicV1.basicSet(value: 0x00).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
+	delayBetween ([zwave.basicV1.basicSet(value: 0x00).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
 }
 
 def setLevel(value) {
     def level = Math.min(value as Integer, 99)
-	delayBetween ([zwave.basicV1.basicSet(value: level).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
+    log.trace "setLevel(value): ${value}"
+    if (value < 30 || value == 61)
+    {
+    	delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
+    }
+   	else if (value < 62 || value == 98)
+    {
+    	delayBetween ([zwave.basicV1.basicSet(value: 62).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
+    }
+    else
+    {
+    	delayBetween ([zwave.basicV1.basicSet(value: 99).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
+    }
+	
 }
 
 def setLevel(value, duration) {
@@ -188,17 +233,17 @@ def setLevel(value, duration) {
 
 def lowSpeed() {
 	log.debug "Low speed settings"
-    delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
+    delayBetween ([zwave.basicV1.basicSet(value: 30).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
 }
 
 def medSpeed() {
 	log.debug "Medium speed settings"
-    delayBetween ([zwave.basicV1.basicSet(value: 62).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
+    delayBetween ([zwave.basicV1.basicSet(value: 62).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
 }
 
 def highSpeed() {
 	log.debug "High speed settings"
-    delayBetween ([zwave.basicV1.basicSet(value: 99).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
+    delayBetween ([zwave.basicV1.basicSet(value: 99).format(), zwave.switchMultilevelV1.switchMultilevelGet().format()], 500)
 }
 
 def poll() {
