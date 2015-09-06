@@ -5,7 +5,7 @@
 */
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Thermostat v3 - 1st Floor", namespace: "jscgs350", author: "jscgs350")
+	definition (name: "My Thermostat v3", namespace: "jscgs350", author: "jscgs350")
     {
 		capability "Refresh"
 		capability "Actuator"
@@ -33,51 +33,52 @@ metadata {
         attribute "currentState", "string"
         attribute "currentMode", "string"
         attribute "currentfanMode", "string"
-        
-		fingerprint deviceId: "0x08"
-		fingerprint inClusters: "0x43,0x40,0x44,0x31"
 	}
 
-//Thermostat Temp and State Row
-	tiles
-    {
-		valueTile("temperature", "device.temperature", width: 2, height: 2) {
-			state("temperature", label:'${currentValue}°', unit:"F",
-				backgroundColors:[
-					[value: 31, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-				]
-			)
+//Thermostat Temp and State
+	tiles(scale: 2) {
+		multiAttributeTile(name:"temperature", type: "lighting", width: 6, height: 4){
+			tileAttribute ("device.temperature", key: "PRIMARY_CONTROL") {
+				attributeState("temperature", icon:"st.tesla.tesla-hvac", label:'${currentValue}°', unit:"F",
+                backgroundColors:[
+                    [value: 31, color: "#153591"],
+                    [value: 44, color: "#1e9cbb"],
+                    [value: 59, color: "#90d2a7"],
+                    [value: 74, color: "#44b621"],
+                    [value: 84, color: "#f1d801"],
+                    [value: 95, color: "#d04e00"],
+                    [value: 96, color: "#bc2323"]
+                ]
+            )
+			}
+            tileAttribute ("statusText", key: "SECONDARY_CONTROL") {
+           		attributeState "statusText", label:'${currentValue}'       		
+            }
 		}
-        standardTile("thermostatOperatingState", "device.currentState", canChangeIcon: false, inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
+        standardTile("thermostatOperatingState", "device.currentState", canChangeIcon: false, inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
             state ("default", label:'${currentValue}', icon:"st.tesla.tesla-hvac")
         }
-		standardTile("thermostatFanState", "device.thermostatFanState", inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
+		standardTile("thermostatFanState", "device.thermostatFanState", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
             state "running", label:'Fan is On', icon:"st.Appliances.appliances11"
             state "idle", label:'Fan is Off', icon:"st.Appliances.appliances11"
         }        
 
-//Thermostat Mode Control Row
-        standardTile("modeoff", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "off", label:'', action:"modeoff", icon:"st.thermostat.heating-cooling-off"
+//Thermostat Mode Control
+        standardTile("modeoff", "device.thermostatMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state "off", label: '', action:"modeoff", icon:"st.thermostat.heating-cooling-off"
         }
-        standardTile("modeheat", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+        standardTile("modeheat", "device.thermostatMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "heat", label:'', action:"modeheat", icon:"st.thermostat.heat"
         }
-        standardTile("modecool", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+        standardTile("modecool", "device.thermostatMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "cool", label:'', action:"modecool", icon:"st.thermostat.cool"
         }        
 
-//Heating Set Point Controls Row
-        standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+//Heating Set Point Controls
+        standardTile("heatLevelUp", "device.heatingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "heatLevelUp", label:'Heat', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"//, backgroundColor:"#F7C4BA"
         }
-        valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false) {
+        valueTile("heatingSetpoint", "device.heatingSetpoint", width: 3, height: 2, inactiveLabel: false) {
 			state "heat", label:'${currentValue}°', unit:"F",
             	backgroundColors:[
 					[value: 40, color: "#f49b88"],
@@ -88,15 +89,15 @@ metadata {
 					[value: 90, color: "#ea3811"]
 				]
 		}
-		standardTile("heatLevelDown", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+		standardTile("heatLevelDown", "device.heatingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "heatLevelDown", label:'Heat', action:"heatLevelDown", icon:"st.thermostat.thermostat-down"//, backgroundColor:"#F7C4BA"
         }
 
-//Cooling Set Point Controls Row
-        standardTile("coolLevelUp", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+//Cooling Set Point Controls
+        standardTile("coolLevelUp", "device.coolingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "coolLevelUp", label:'Cool', action:"coolLevelUp", icon:"st.thermostat.thermostat-up"//, backgroundColor:"#F7C4BA"
         }
-		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false) {
+		valueTile("coolingSetpoint", "device.coolingSetpoint", width: 3, height: 2, inactiveLabel: false) {
 			state "cool", label:'${currentValue}°', unit:"F",
             	backgroundColors:[
 					[value: 40, color: "#88e1f4"],
@@ -107,41 +108,49 @@ metadata {
 					[value: 90, color: "#11c3ea"]
 				]
 		}
-		standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+		standardTile("coolLevelDown", "device.coolingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"//, backgroundColor:"#F7C4BA"
         }
 
-//Fan Mode Control Row        
-        standardTile("fanauto", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
+//Fan Mode Control        
+        standardTile("fanauto", "device.thermostatFanMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "fanauto", label:'', action:"fanauto", icon:"st.thermostat.fan-auto"
         }
-        standardTile("fanon", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
+        standardTile("fanon", "device.thermostatFanMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "fanon", label:'', action:"fanon", icon:"st.thermostat.fan-on"
         }
-        standardTile("fancir", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
+        standardTile("fancir", "device.thermostatFanMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "fancir", label:'', action:"fancir", icon:"st.thermostat.fan-circulate"
         }
 
-//Refresh and Config Controls Row
-        standardTile("modefan", "device.currentfanMode", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+//Refresh and Config Controls
+        standardTile("modefan", "device.currentfanMode", width: 2, height: 2, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state ("default", label:'${currentValue}', icon:"st.Appliances.appliances11")
         }
-		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+		standardTile("refresh", "device.thermostatMode", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", action:"poll", icon:"st.secondary.refresh"
 		}
-		standardTile("configure", "device.configure", inactiveLabel: false, decoration: "flat") {
+		standardTile("configure", "device.configure", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'  ', action:"configuration.configure", icon:"st.secondary.configure"
 		}
 
+        valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
+			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
+		}
+
 		main "temperature"
-		
-//        details(["temperature", "thermostatOperatingState", "thermostatFanState", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "fanauto", "fanon", "fancir", "modeoff", "modeheat", "modecool", "modefan", "refresh", "configure"])
-        details(["temperature", "thermostatOperatingState", "thermostatFanState", "heatLevelUp", "coolLevelUp", "fanauto", "heatingSetpoint", "coolingSetpoint", "fanon", "heatLevelDown", "coolLevelDown", "fancir", "modeoff", "modeheat", "modecool", "modefan", "refresh", "configure"])
+        details(["temperature", "heatLevelUp", "coolLevelUp", "heatingSetpoint", "coolingSetpoint", "heatLevelDown", "coolLevelDown", "fanon", "fanauto", "fancir", "modeoff", "modeheat", "modecool", "thermostatOperatingState", "thermostatFanState", "modefan", "refresh", "configure"])
 	}
 }
 
 def parse(String description)
 {
+
+    def statusTextmsg = ""
+    statusTextmsg = "${device.currentState('currentState').value}, Fan is in ${device.currentState('currentfanMode').value} and it is ${device.currentState('thermostatFanState').value}."
+    sendEvent("name":"statusText", "value":statusTextmsg)
+    log.debug statusTextmsg
+
 	def map = createEvent(zwaveEvent(zwave.parse(description, [0x42:1, 0x43:2, 0x31: 3])))
 	if (!map) {
 		return null
@@ -191,7 +200,7 @@ def parse(String description)
 	} else if (map.name == "thermostatFanMode" && map.isStateChange) {
 		state.lastTriedFanMode = map.value
 	}
-
+    
 	log.debug "Parse returned $result"
 	result
 }
