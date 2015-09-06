@@ -32,6 +32,8 @@
  *				Modified to allow dim rate in Preferences. Added ability to dim during On/Off commands and included this option in Preferences. Defaults are "Normal" and no dim for On/Off.
  *	Change 7:	2015-01-09	(tslagle13)
  *				dimOnOff is was boolean, and switched to enum. Properly update "rampOn" and "rampOff" when refreshed or a polled (dim transition for On/Off commands)
+ 	Change 8	2015-09-06  (Sticks18)
+ *              		Modified tile layout to make use of new multiattribute tile for dimming
  *
  *
  */
@@ -41,39 +43,52 @@ metadata {
     	capability "Actuator"
         capability "Configuration"
         capability "Refresh"
-		capability "Sensor"
+	capability "Sensor"
         capability "Switch"
-		capability "Switch Level"
+	capability "Switch Level"
         capability "Polling"
-
+	
+	attribute "attDimRate", "string"
+        attribute "attDimOnOff", "string"
+		
 		fingerprint profileId: "0104", inClusters: "0000,0003,0004,0005,0006,0008,1000", outClusters: "0019"
 	}
 
 	// UI tile definitions
-	tiles {
-		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true, canChangeBackground: true) {
-			state "off", label: '${name}', action: "switch.on", icon: "st.switches.light.off", backgroundColor: "#ffffff"
-			state "on", label: '${name}', action: "switch.off", icon: "st.switches.light.on", backgroundColor: "#79b821"
+	tiles(scale: 2) {
+		multiAttributeTile(name: "switch", type: "lighting", width: 6, height: 4, canChangeIcon: true, canChangeBackground: true) {
+			tileAttribute("device.switch", key: "PRIMARY_CONTROL") {
+        			attributeState "off", label: '${name}', action: "switch.on", icon: "st.switches.light.off", backgroundColor: "#ffffff", nextState: "turningOn"
+			      	attributeState "on", label: '${name}', action: "switch.off", icon: "st.switches.light.on", backgroundColor: "#79b821", nextState: "turningOff"
+                  		attributeState "turningOff", label: '${name}', action: "switch.on", icon: "st.switches.light.off", backgroundColor: "#ffffff", nextState: "turningOn"
+			      	attributeState "turningOn", label: '${name}', action: "switch.off", icon: "st.switches.light.on", backgroundColor: "#79b821", nextState: "turningOff"
+            		}
+            		tileAttribute("device.level", key: "SLIDER_CONTROL") {
+                  		attributeState "level", action:"switch level.setLevel"
+            		}
+            		tileAttribute("level", key: "SECONDARY_CONTROL") {
+                  		attributeState "level", label: 'Light dimmed to ${currentValue}%'
+            		}    
 		}
-		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
+		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 3, inactiveLabel: false) {
-			state "level", action:"switch level.setLevel"
+        	valueTile("attDimRate", "device.attDimRate", inactiveLabel: false, decoration: "flat", width: 4, height: 1) {
+			state "attDimRate", label: 'Dim rate: ${currentValue}'
 		}
-		valueTile("level", "device.level", inactiveLabel: false, decoration: "flat") {
-			state "level", label: 'Level ${currentValue}%'
+        	valueTile("attDimOnOff", "device.attDimOnOff", inactiveLabel: false, decoration: "flat", width: 4, height: 1) {
+			state "attDimOnOff", label: 'Dim for on/off: ${currentValue}'
 		}
 
-		main(["switch"])
-		details(["switch", "level", "levelSliderControl", "refresh"])
+		main "switch"
+		details(["switch","attDimRate", "refresh", "attDimOnOff"])
 	}
 	
-	    preferences {
+	preferences {
         
-        	input("dimRate", "enum", title: "Dim Rate", options: ["Instant", "Normal", "Slow", "Very Slow"], defaultValue: "Normal", required: false, displayDuringSetup: true)
-            input("dimOnOff", "enum", title: "Dim transition for On/Off commands?", options: ["Yes", "No"], defaultValue: "No", required: false, displayDuringSetup: true)
-            
+            	input("dimRate", "enum", title: "Dim Rate", options: ["Instant", "Normal", "Slow", "Very Slow"], defaultValue: "Normal", required: false, displayDuringSetup: true)
+            	input("dimOnOff", "enum", title: "Dim transition for On/Off commands?", options: ["Yes", "No"], defaultValue: "No", required: false, displayDuringSetup: true)
+          
     }
 }
 
@@ -182,6 +197,9 @@ def poll() {
 }
 
 def updated() {
+
+	sendEvent( name: "attDimRate", value: "${dimRate}" )
+    	sendEvent( name: "attDimOnOff", value: "${dimOnOff}" )
 
 	state.dOnOff = "0000"
     
