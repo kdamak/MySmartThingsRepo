@@ -7,7 +7,7 @@ metadata {
 		capability "Switch"
 		capability "Polling"
 		capability "Refresh"
-		capability "Sensor"
+	capability "Sensor"
         
         command "lowSpeed"
         command "medSpeed"
