@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My GE Fan Control Switch", namespace: "jscgs350", author: "SmartThings") {
+	definition (name: "My GE Fan Control Switch v2", namespace: "jscgs350", author: "SmartThings") {
 		capability "Switch Level"
 		capability "Actuator"
 		capability "Indicator"
@@ -64,12 +64,6 @@ metadata {
 }
 
 def parse(String description) {
-
-	def statusTextmsg = ""
-//    statusTextmsg = "${device.currentState('currentState').value}, Fan is in ${device.currentState('currentfanMode').value} and it is ${device.currentState('thermostatFanState').value}."
-    statusTextmsg = "Current fan speed setting is ${device.currentState('currentSpeed').value}."
-    sendEvent("name":"statusText", "value":statusTextmsg)
-    log.debug statusTextmsg
     
 	def item1 = [
 		canBeCurrentState: false,
@@ -88,6 +82,12 @@ def parse(String description) {
 		item1.displayed = displayed(description, item1.isStateChange)
 		result = [item1]
 	}
+    
+	def statusTextmsg = ""
+    statusTextmsg = "Current fan speed setting is ${device.currentState('currentSpeed').value}."
+    sendEvent("name":"statusText", "value":statusTextmsg)
+    log.debug statusTextmsg
+
 	log.debug "Parse returned ${result?.descriptionText}"
 	result
 }
