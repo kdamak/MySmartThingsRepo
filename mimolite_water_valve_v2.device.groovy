@@ -5,7 +5,7 @@ metadata {
 		capability "Polling"
         capability "Refresh"
         capability "Switch"
-		capability "Valve"
+	capability "Valve"
         capability "Contact Sensor"
         capability "Configuration"
         attribute "power", "string"
