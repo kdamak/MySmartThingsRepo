@@ -18,20 +18,24 @@ metadata {
         attribute "power", "string"
 	}
 
-	// tile definitions
-	tiles {
-        standardTile("contact", "device.contact", width: 2, height: 2, inactiveLabel: false) {
-            state "open", label: 'Open', action: "momentary.push", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e"
-            state "closed", label: 'Closed', action: "momentary.push", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821"
-        }
-        standardTile("power", "device.power", inactiveLabel: false) {
+	// tile definitions        
+	tiles(scale: 2) {
+		multiAttributeTile(name:"contact", type: "generic", width: 6, height: 4){
+			tileAttribute ("device.contact", key: "PRIMARY_CONTROL") {
+				attributeState "closed", label: 'Closed', action: "momentary.push", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821", nextState:"openingdoor"
+				attributeState "open", label: 'Open', action: "momentary.push", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e", nextState:"closingdoor"
+                attributeState "closingdoor", label:'Closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffd700"
+                attributeState "openingdoor", label:'Opening', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffd700"
+			}
+		}                
+        standardTile("power", "device.power", width: 2, height: 2, inactiveLabel: false) {
         	state "dead", label: 'OFF', icon:"st.switches.switch.off", backgroundColor: "#ff0000"
         	state "alive", label: 'ON', icon:"st.switches.switch.on", backgroundColor: "#79b821"
         }
-        standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
+        standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
         }
-		standardTile("configure", "device.configure", inactiveLabel: false, decoration: "flat") {
+		standardTile("configure", "device.configure", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
         main (["contact"])
