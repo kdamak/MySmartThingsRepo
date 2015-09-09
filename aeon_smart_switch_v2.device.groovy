@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "My Aeon Metering Switch", namespace: "jscgs350", author: "SmartThings") {
+	definition (name: "My Aeon Metering Switch v2", namespace: "jscgs350", author: "SmartThings") {
 		capability "Energy Meter"
 		capability "Actuator"
 		capability "Switch"
