@@ -5,7 +5,7 @@ metadata {
 		capability "Polling"
         capability "Refresh"
         capability "Switch"
-	capability "Valve"
+		capability "Valve"
         capability "Contact Sensor"
         capability "Configuration"
         attribute "power", "string"
@@ -80,11 +80,11 @@ def sensorValueEvent(Short value) {
     if (value) {
 		log.debug "Main Water Valve is Open"
 		sendEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
-        sendEvent(name: "valveState", value: "flowing water (ON)")
+        sendEvent(name: "valveState", value: "flowing water (tap to close)")
     } else {
     	log.debug "Main Water Valve is Closed"
         sendEvent(name: "contact", value: "closed", descriptionText: "$device.displayName is closed")
-        sendEvent(name: "valveState", value: "NOT flowing water (OFF)")
+        sendEvent(name: "valveState", value: "NOT flowing water (tap to open)")
     }
 }
 
@@ -184,8 +184,9 @@ def refresh() {
 def configure() {
 	log.debug "Executing Configure for Main Water Valve per user request"
 	def cmd = delayBetween([
+		zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:[zwaveHubNodeId]).format(), //subscribe to power alarm
+        zwave.configurationV1.configurationSet(configurationValue: [25], parameterNumber: 11, size: 1).format(),
         zwave.configurationV1.configurationSet(parameterNumber: 11, size: 1, configurationValue: [0]).format(), // momentary relay disable=0 (default)
-        zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:zwaveHubNodeId).format(),	//subscribe to power alarm
 	],100)
     log.debug "zwaveEvent ConfigurationReport: '${cmd}'"
 }
