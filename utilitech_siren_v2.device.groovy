@@ -31,17 +31,17 @@ metadata {
 		standardTile("off", "device.alarm", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"alarm.off", icon:"st.secondary.off"
 		}
-        valueTile("battery", "device.battery", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+        valueTile("battery", "device.battery", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "battery", label:'${currentValue}% battery', unit:""
 		}
-        standardTile("refresh", "device.refresh", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+        standardTile("refresh", "device.refresh", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
         valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
 			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
 		}        
 		main "alarm"
-		details(["alarm","off","battery","refresh"])
+		details(["alarm","battery","refresh"])
 	}
 }
 
