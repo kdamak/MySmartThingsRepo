@@ -101,13 +101,13 @@ metadata {
 
 
 def parse(String description) {
-    log.debug "Parse received ${description}"
+//    log.debug "Parse received ${description}"
     def result = null
     def cmd = zwave.parse(description, [0x31: 1, 0x32: 1, 0x60: 3])
     if (cmd) {
         result = createEvent(zwaveEvent(cmd))
     }
-    if (result) log.debug "Parse returned ${result}"
+//    if (result) log.debug "Parse returned ${result}"
            
     def statusTextmsg = ""
     statusTextmsg = "Home is currently using ${device.currentState('powerDisp').value}.\nMin was ${device.currentState('powerOne').value}.\nMax was ${device.currentState('powerTwo').value}."
@@ -118,7 +118,7 @@ def parse(String description) {
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
-    log.debug "zwaveEvent received ${cmd}"
+//    log.debug "zwaveEvent received ${cmd}"
     def dispValue
     def newValue
     def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
@@ -177,7 +177,7 @@ def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
     } else {
         map.value = cmd.batteryLevel
     }
-    log.debug map
+//    log.debug map
     return map
 }
 
