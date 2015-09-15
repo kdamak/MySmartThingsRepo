@@ -8,8 +8,9 @@
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v3", namespace: "jscgs350", author: "jscgs350") {
+		capability "Alarm"
         capability "Momentary"
-	capability "Polling"
+		capability "Polling"
         capability "Refresh"
         capability "Switch"
         capability "Contact Sensor"
@@ -52,8 +53,8 @@ metadata {
 
 def parse(String description) {
     def result = null
-    def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1])
-
+    def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1, 0x20: 1, 0x84: 1])
+	log.debug cmd
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
         sendEvent(name: "powerState", value: "NO POWER!")
@@ -67,7 +68,9 @@ def parse(String description) {
     }
     
     def statusTextmsg = ""
-    statusTextmsg = "Garage door is ${device.currentState('contactState').value} and it has ${device.currentState('powerState').value}"
+//    def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
+    def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
+    statusTextmsg = "Garage door is ${device.currentState('contactState').value}.\nLast activity was at "+timeString+".\nDevice has ${device.currentState('powerState').value}"
     sendEvent("name":"statusText", "value":statusTextmsg)
     log.debug statusTextmsg
 
