@@ -18,7 +18,7 @@ metadata {
 
     // UI tile definitions
 	tiles(scale: 2) {
-		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true){
+		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true, decoration: "flat"){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
 				attributeState "on", label: 'Open Valve', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
 				attributeState "off", label: 'Close Valve', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
@@ -54,8 +54,8 @@ metadata {
 def parse(String description) {
 
     def result = null
-    def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1])
-
+    def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1, 0x20: 1, 0x84: 1])
+	log.debug cmd
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
         sendEvent(name: "powerState", value: "NO POWER!")
@@ -69,7 +69,8 @@ def parse(String description) {
     }
     
     def statusTextmsg = ""
-    statusTextmsg = "Water valve is ${device.currentState('valveState').value} and it has ${device.currentState('powerState').value}"
+    def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
+    statusTextmsg = "Water valve is ${device.currentState('valveState').value}.\nLast activity was at "+timeString+".\nDevice has ${device.currentState('powerState').value}"
     sendEvent("name":"statusText", "value":statusTextmsg)
     log.debug statusTextmsg
 
