@@ -8,9 +8,9 @@
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v3", namespace: "jscgs350", author: "jscgs350") {
-		capability "Alarm"
+	capability "Alarm"
         capability "Momentary"
-		capability "Polling"
+	capability "Polling"
         capability "Refresh"
         capability "Switch"
         capability "Contact Sensor"
@@ -26,12 +26,12 @@ metadata {
 			tileAttribute ("device.contact", key: "PRIMARY_CONTROL") {
 				attributeState "closed", label: 'Closed', action: "momentary.push", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821", nextState:"openingdoor"
 				attributeState "open", label: 'Open', action: "momentary.push", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e", nextState:"closingdoor"
-                attributeState "closingdoor", label:'Closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffd700"
-                attributeState "openingdoor", label:'Opening', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffd700"
+                		attributeState "closingdoor", label:'Closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffd700"
+                		attributeState "openingdoor", label:'Opening', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffd700"
 			}
-            tileAttribute ("statusText", key: "SECONDARY_CONTROL") {
-           		attributeState "statusText", label:'${currentValue}'       		
-            }
+            		tileAttribute ("statusText", key: "SECONDARY_CONTROL") {
+           			attributeState "statusText", label:'${currentValue}'       		
+            		}
 		}                
         standardTile("power", "device.power", width: 3, height: 2, inactiveLabel: false) {
         	state "dead", label: 'OFF', icon:"st.switches.switch.off", backgroundColor: "#ff0000"
@@ -40,12 +40,12 @@ metadata {
         standardTile("refresh", "device.switch", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
             state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
         }
-		standardTile("configure", "device.configure", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
-			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
-		}
+	standardTile("configure", "device.configure", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
+		state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
+	}
         valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
-			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
-		}
+		state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
+	}
         main (["contact"])
         details(["contact", "refresh", "configure"])
     }
