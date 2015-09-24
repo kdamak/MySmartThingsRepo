@@ -8,7 +8,7 @@
  *    This triggers the forced Wake up so that the settings can take effect immediately.
  *
  *  Author: FlorianZ,Kranasian, Humac, jscgs350
- *  Date: 2015-03-17
+ *  Date: 2015-09-24
  */
 preferences {
     input "inactivityTimeout", "number", title: "Inactivity Timeout", description: "Number of minutes after movement is gone before its reported inactive by the sensor."
