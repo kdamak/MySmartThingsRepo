@@ -15,6 +15,7 @@ metadata {
         capability "Switch"
         capability "Contact Sensor"
         capability "Configuration"
+        capability "Garage Door Control"
         attribute "power", "string"
         attribute "contactState", "string"
         attribute "powerState", "string"
