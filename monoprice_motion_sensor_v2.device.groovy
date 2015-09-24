@@ -10,16 +10,21 @@
  *  Author: FlorianZ,Kranasian, Humac, jscgs350
  *  Date: 2015-09-24
  */
+
 preferences {
-    input "inactivityTimeout", "number", title: "Inactivity Timeout", description: "Number of minutes after movement is gone before its reported inactive by the sensor."
-    input description: "This feature allows you to correct any temperature variations by selecting an offset. Ex: If your sensor consistently reports a temp that's 5 degrees too warm, you'd enter \"-5\". If 3 degrees too cold, enter \"+3\".", displayDuringSetup: false, type: "paragraph", element: "paragraph"
+	input description: "Number of minutes after movement is gone before its reported inactive by the sensor.", displayDuringSetup: false, type: "paragraph", element: "paragraph"
+    input "inactivityTimeout", "number", title: "Inactivity Timeout", displayDuringSetup: false
+
+	input description: "This feature allows you to correct any temperature variations by selecting an offset. Ex: If your sensor consistently reports a temp that's 5 degrees too warm, you'd enter \"-5\". If 3 degrees too cold, enter \"+3\".", displayDuringSetup: false, type: "paragraph", element: "paragraph"
     input "tempOffset", "number", title: "Temperature Offset", description: "Adjust temperature by this many degrees", range: "*..*", displayDuringSetup: false
-    input description: "This feature allows you to change the temperature Unit. If left blank or anything else is typed the default is F.", displayDuringSetup: false, type: "paragraph", element: "paragraph" 
+
+	input description: "This feature allows you to change the temperature Unit. If left blank or anything else is typed the default is F.", displayDuringSetup: false, type: "paragraph", element: "paragraph" 
     input "tempUnit", "string", title: "Celsius or Fahrenheit", description: "Temperature Unit (Type C or F)", displayDuringSetup: false
+
 }
 
 metadata {
-    definition (name:"My Monoprice Motion Sensor", namespace:"jscgs350", author: "florianz") {
+    definition (name:"My Monoprice Motion Sensor v2", namespace:"jscgs350", author: "florianz") {
         capability "Battery"
         capability "Motion Sensor"
         capability "Temperature Measurement"
@@ -27,7 +32,7 @@ metadata {
 
         fingerprint deviceId:"0x2001", inClusters:"0x71, 0x85, 0x80, 0x72, 0x30, 0x86, 0x31, 0x70, 0x84"
     }
-  
+
 	tiles(scale: 2) {
 		multiAttributeTile(name:"motion", type: "generic", width: 6, height: 4){
 			tileAttribute ("device.motion", key: "PRIMARY_CONTROL") {
@@ -35,7 +40,7 @@ metadata {
 				attributeState "inactive", label:'no motion', icon:"st.motion.motion.inactive", backgroundColor:"#ffffff"
 			}
 		}
-		valueTile("temperature", "device.temperature", width: 2, height: 2) {
+		valueTile("temperature", "device.temperature", width: 3, height: 2) {
 			state("temperature", label:'${currentValue}°', unit:"F",
 				backgroundColors:[
 					[value: 31, color: "#153591"],
@@ -48,30 +53,12 @@ metadata {
 				]
 			)
 		}
-		valueTile("battery", "device.battery", decoration: "flat", inactiveLabel: false, width: 2, height: 2) {
+		valueTile("battery", "device.battery", decoration: "flat", inactiveLabel: false, width: 3, height: 2) {
 			state "battery", label:'${currentValue}% battery', unit:""
 		}
-		standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
-			state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
-		}
-		standardTile("configure", "device.configure", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
-			state "configure", label:'', action:"configure.configure", icon:"st.secondary.configure"
-		}
 		main(["motion", "temperature"])
-		details(["motion", "temperature", "battery", "configure"])
+		details(["motion", "temperature", "battery"])
 	}
-}
-
-def c2f(value) {
-
-    value as float
-}
-
-def configure() {
-    log.debug "Monoprice Motion Sensor Configuration Request Sent"    
-	delayBetween([
-		zwave.configurationV1.configurationSet(parameterNumber: 1, size: 1, scaledConfigurationValue: 1).format()
-    ])
 }
 
 def parse(String description) {
@@ -88,9 +75,13 @@ def parse(String description) {
             result << new physicalgraph.device.HubAction(zwave.wakeUpV1.wakeUpNoMoreInformation().format())
         }
     }
+    
+//	log.debug "Applying preferences for Monoprice Motion Sensor"
+//  zwave.configurationV1.configurationSet(configurationValue: [inactivityTimeout], parameterNumber: 1, size: 1).format()
+//  log.debug "zwaveEvent ConfigurationReport: '${cmd}'"
 
-    log.debug "Parse returned ${result}"
     return result
+
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd) {
