@@ -24,7 +24,7 @@ preferences {
 }
 
 metadata {
-    definition (name:"My Monoprice Motion Sensor v2", namespace:"jscgs350", author: "florianz") {
+    definition (name:"My Monoprice Motion Sensor v2", namespace:"jscgs350", author: "several") {
         capability "Battery"
         capability "Motion Sensor"
         capability "Temperature Measurement"
