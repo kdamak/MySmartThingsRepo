@@ -13,7 +13,7 @@
 
 preferences {
 	input description: "Number of minutes after movement is gone before its reported inactive by the sensor.", displayDuringSetup: false, type: "paragraph", element: "paragraph"
-    input "inactivityTimeout", "number", title: "Inactivity Timeout", displayDuringSetup: false
+    input "inactivityTimeout", "number", title: "Inactivity Timeout", displayDuringSetup: false, default: 3
 
 	input description: "This feature allows you to correct any temperature variations by selecting an offset. Ex: If your sensor consistently reports a temp that's 5 degrees too warm, you'd enter \"-5\". If 3 degrees too cold, enter \"+3\".", displayDuringSetup: false, type: "paragraph", element: "paragraph"
     input "tempOffset", "number", title: "Temperature Offset", description: "Adjust temperature by this many degrees", range: "*..*", displayDuringSetup: false
@@ -76,8 +76,8 @@ def parse(String description) {
         }
     }
     
-//	log.debug "Applying preferences for Monoprice Motion Sensor"
-//  zwave.configurationV1.configurationSet(configurationValue: [inactivityTimeout], parameterNumber: 1, size: 1).format()
+//  log.debug "Applying preferences for Monoprice Motion Sensor: ${inactivityTimeout}"
+//    zwave.configurationV1.configurationSet(configurationValue: [inactivityTimeout], parameterNumber: 1, size: 1).format()
 //  log.debug "zwaveEvent ConfigurationReport: '${cmd}'"
 
     return result
@@ -93,9 +93,9 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd) {
 }
 
 def sendSettingsUpdate(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd) {
-    def inactivityTimeout = (settings.inactivityTimeout == null ?
+/*    def inactivityTimeout = (settings.inactivityTimeout == null ?
                              1 : Integer.parseInt(settings.inactivityTimeout))
-    def inactivityTimeoutStr = Integer.toString(inactivityTimeout)
+    def inactivityTimeoutStr = Integer.toString(inactivityTimeout) */
     def actions = []
     def lastBatteryUpdate = state.lastBatteryUpdate == null ? 0 : state.lastBatteryUpdate
     if ((new Date().time - lastBatteryUpdate) > 1000 * 60 * 60 * 24) {
