@@ -12,39 +12,37 @@
  *
  *  Aeon Home Energy Meter v1 (US)
  *
+ *  DrShaw Modifications: Updated configuration settings and tiles
  */
-
 metadata {
-
-	definition (name: "My Aeon Home Energy Monitor v2", namespace: "jscgs350", author: "SmartThings") 
-    {
-        capability "Energy Meter"
-        capability "Power Meter"
-        capability "Configuration"
-        capability "Sensor"
-        capability "Refresh"
-        capability "Polling"
-        capability "Battery"
-        
-        attribute "energy", "string"
-        attribute "energyDisp", "string"
-        attribute "energyOne", "string"
-        attribute "energyTwo", "string"
-        
-        attribute "power", "string"
-        attribute "powerDisp", "string"
-        attribute "powerOne", "string"
-        attribute "powerTwo", "string"
-        
-        command "reset"
-        command "configure"
-        
-        fingerprint deviceId: "0x2101", inClusters: " 0x70,0x31,0x72,0x86,0x32,0x80,0x85,0x60"
-
-    }
-
-// tile definitions
+    definition (name: "My Aeon Home Energy Monitor v2", namespace: "jscgs350", author: "SmartThings") 
+{
+    capability "Energy Meter"
+    capability "Power Meter"
+    capability "Configuration"
+    capability "Sensor"
+    capability "Refresh"
+    capability "Polling"
+    capability "Battery"
     
+    attribute "energy", "string"
+    attribute "energyDisp", "string"
+    attribute "energyOne", "string"
+    attribute "energyTwo", "string"
+    
+    attribute "power", "string"
+    attribute "powerDisp", "string"
+    attribute "powerOne", "string"
+    attribute "powerTwo", "string"
+    
+    command "reset"
+    command "configure"
+    command "resetmaxmin"
+    
+    fingerprint deviceId: "0x2101", inClusters: " 0x70,0x31,0x72,0x86,0x32,0x80,0x85,0x60"
+
+}
+// tile definitions
 	tiles(scale: 2) {
 		multiAttributeTile(name:"powerDisp", type: "lighting", width: 6, height: 4, decoration: "flat", canChangeIcon: true){
 			tileAttribute ("device.powerDisp", key: "PRIMARY_CONTROL") {
@@ -54,52 +52,55 @@ metadata {
            		attributeState "statusText", label:'${currentValue}'       		
             }
 		}    
-       
 // Power row
-    
         valueTile("energyDisp", "device.energyDisp", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state("default", label: '${currentValue}', backgroundColor:"#ffffff")
         }
-        
         valueTile("energyOne", "device.energyOne", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state("default", label: '${currentValue}', backgroundColor:"#ffffff")
         }        
-        
         valueTile("energyTwo", "device.energyTwo", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state("default", label: '${currentValue}', backgroundColor:"#ffffff")
         }
-        
 // Controls row
-    
-
         standardTile("reset", "device.energy", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
-			state "default", label:'Reset', action:"reset", icon:"st.secondary.refresh-icon"
-		}
-        standardTile("refresh", "device.power", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
-            state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
-        }
-        standardTile("configure", "device.power", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
-            state "configure", label:'', action:"configure", icon:"st.secondary.configure"
-        }
-        
-        valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
-            state "battery", label:'${currentValue}% battery', unit:""
-        }
-        
-        valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
-			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
-		}
-        
-        main (["powerDisp"])
-		details(["powerDisp", "energyDisp", "energyOne", "energyTwo", "reset", "refresh", "configure"])
-    	}
+		state "default", label:'Reset All', action:"reset", icon:"st.secondary.refresh-icon"
+	}
+    standardTile("refresh", "device.power", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+        state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+    }
+    standardTile("configure", "device.power", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+        state "configure", label:'', action:"configure", icon:"st.secondary.configure"
+    }
     
-        preferences {
-            input "kWhCost", "string", title: "\$/kWh (0.16)", defaultValue: "0.16" as String
-        }
+    valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
+        state "battery", label:'${currentValue}% battery', unit:""
+    }
+    
+    valueTile("statusText", "statusText", width: 3, height: 2, inactiveLabel: false) {
+		state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
+	}
+    
+    valueTile("min", "powerOne", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+		state "default", label:'Min:\n${currentValue}', backgroundColor:"#ffffff"
+	}
+
+	valueTile("max", "powerTwo", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+		state "default", label:'Max:\n${currentValue}', backgroundColor:"#ffffff"
+	}
+
+    standardTile("resetmaxmin", "device.energy", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+		state "default", label:'Reset Max/Min', action:"resetmaxmin", icon:"st.secondary.refresh-icon"
+	}
+
+    main (["powerDisp"])
+	details(["powerDisp", "energyDisp", "energyOne", "energyTwo", "min", "max", "refresh", "resetmaxmin", "reset", "configure"])
+	}
+
+    preferences {
+        input "kWhCost", "string", title: "\$/kWh (0.16)", defaultValue: "0.16" as String
+    }
 }
-
-
 def parse(String description) {
 //    log.debug "Parse received ${description}"
     def result = null
@@ -108,17 +109,14 @@ def parse(String description) {
         result = createEvent(zwaveEvent(cmd))
     }
 //    if (result) log.debug "Parse returned ${result}"
-           
     def statusTextmsg = ""
-    statusTextmsg = "Home is currently using ${device.currentState('powerDisp')?.value}.\nMin was ${device.currentState('powerOne')?.value}.\nMax was ${device.currentState('powerTwo')?.value}."
+    statusTextmsg = "Home is currently using ${device.currentState('powerDisp').value}.\nMin was ${device.currentState('powerOne').value}.\nMax was ${device.currentState('powerTwo').value}."
     sendEvent("name":"statusText", "value":statusTextmsg)
 //    log.debug statusTextmsg
-    
     return result
 }
-
 def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
-//    log.debug "zwaveEvent received ${cmd}"
+    //log.debug "zwaveEvent received ${cmd}"
     def dispValue
     def newValue
     def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
@@ -148,7 +146,6 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
             if (newValue != state.powerValue) {
                 dispValue = newValue+"w"
                 sendEvent(name: "powerDisp", value: dispValue as String, unit: "")
-                
                 if (newValue < state.powerLow) {
                     dispValue = newValue+"w"+" on "+timeString
                     sendEvent(name: "powerOne", value: dispValue as String, unit: "")
@@ -165,7 +162,6 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
         }
     }
 }
-
 def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
     def map = [:]
     map.name = "battery"
@@ -180,61 +176,62 @@ def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
 //    log.debug map
     return map
 }
-
 def zwaveEvent(physicalgraph.zwave.Command cmd) {
     // Handles all Z-Wave commands we aren't interested in
     log.debug "Unhandled event ${cmd}"
     [:]
 }
-
 def refresh() {
     delayBetween([
-        zwave.meterV2.meterGet(scale: 0).format(),
-        zwave.meterV2.meterGet(scale: 2).format()
-    ])
+    zwave.meterV2.meterGet(scale: 0).format(),
+    zwave.meterV2.meterGet(scale: 2).format()
+])
 }
-
 def poll() {
     refresh()
 }
-    
 def reset() {
-    log.debug "${device.name} reset"
-
+    log.debug "${device.name} reset all values"
     state.powerHigh = 0
-    state.powerLow = 99999
+state.powerLow = 99999
 
-    def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
-    sendEvent(name: "energyOne", value: "Since:\n"+timeString, unit: "")
-    sendEvent(name: "powerOne", value: "", unit: "")    
-    sendEvent(name: "powerDisp", value: "", unit: "")    
-    sendEvent(name: "energyDisp", value: "", unit: "")
-    sendEvent(name: "energyTwo", value: "Cost\n--", unit: "")
-    sendEvent(name: "powerTwo", value: "", unit: "")    
-    
+def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
+sendEvent(name: "energyOne", value: "Since:\n"+timeString, unit: "")
+sendEvent(name: "powerOne", value: "", unit: "")    
+sendEvent(name: "powerDisp", value: "", unit: "")    
+sendEvent(name: "energyDisp", value: "", unit: "")
+sendEvent(name: "energyTwo", value: "Cost\n--", unit: "")
+sendEvent(name: "powerTwo", value: "", unit: "")
 // No V1 available
     def cmd = delayBetween( [
         zwave.meterV2.meterReset().format(),
         zwave.meterV2.meterGet(scale: 0).format()
     ])
-    
     cmd
 }
+def resetmaxmin() {
+    log.debug "${device.name} reset max/min values"
+    state.powerHigh = 0
+state.powerLow = 99999
 
+sendEvent(name: "powerOne", value: "", unit: "")    
+sendEvent(name: "powerTwo", value: "", unit: "")    
+
+refresh()
+}
 def configure() {
-
     def cmd = delayBetween([
-        zwave.configurationV1.configurationSet(parameterNumber: 3, size: 1, scaledConfigurationValue: 1).format(),      // Enable selective reporting = 1.  Disabling (0), allows parameter 4 and 8 to work
-        zwave.configurationV1.configurationSet(parameterNumber: 4, size: 2, scaledConfigurationValue: 50).format(),     // Don't send unless watts have increased by 50 (default
-        zwave.configurationV1.configurationSet(parameterNumber: 8, size: 1, scaledConfigurationValue: 10).format(),     // Or by 10% (default)
-        zwave.configurationV1.configurationSet(parameterNumber: 101, size: 4, scaledConfigurationValue: 10).format(),   // Combined power in Watts
-        zwave.configurationV1.configurationSet(parameterNumber: 111, size: 4, scaledConfigurationValue: 30).format(),   // Every 30 Seconds
-        zwave.configurationV1.configurationSet(parameterNumber: 102, size: 4, scaledConfigurationValue: 4).format(),    // Combined energy in kWh
-        zwave.configurationV1.configurationSet(parameterNumber: 112, size: 4, scaledConfigurationValue: 150).format(),  // every 2.5 minute
-        zwave.configurationV1.configurationSet(parameterNumber: 103, size: 4, scaledConfigurationValue: 1).format(),    // Total kWh (cumulative)
-        zwave.configurationV1.configurationSet(parameterNumber: 113, size: 4, scaledConfigurationValue: 300).format()   // every 5 minutes
-    ])
-    log.debug cmd
+    zwave.configurationV1.configurationSet(parameterNumber: 3, size: 1, scaledConfigurationValue: 0).format(),      // Disable selective reporting, so always update based on schedule below <set to 1 to reduce network traffic>
+    zwave.configurationV1.configurationSet(parameterNumber: 4, size: 2, scaledConfigurationValue: 50).format(),     // (DISABLED by first option) Don't send unless watts have changed by 50 <default>
+    zwave.configurationV1.configurationSet(parameterNumber: 8, size: 1, scaledConfigurationValue: 10).format(),     // (DISABLED by first option) Or by 10% <default>
+    zwave.configurationV1.configurationSet(parameterNumber: 101, size: 4, scaledConfigurationValue: 4).format(),   // Combined energy in Watts
+    zwave.configurationV1.configurationSet(parameterNumber: 111, size: 4, scaledConfigurationValue: 15).format(),   // Every 15 Seconds (for Watts)
+    zwave.configurationV1.configurationSet(parameterNumber: 102, size: 4, scaledConfigurationValue: 8).format(),    // Combined energy in kWh
+    zwave.configurationV1.configurationSet(parameterNumber: 112, size: 4, scaledConfigurationValue: 60).format(),  // every 60 seconds (for kWh)
+    zwave.configurationV1.configurationSet(parameterNumber: 103, size: 4, scaledConfigurationValue: 0).format(),    // Disable report 3
+    zwave.configurationV1.configurationSet(parameterNumber: 113, size: 4, scaledConfigurationValue: 0).format()   // Disable report 3
+])
+log.debug cmd
 
-    cmd
+cmd
 }
