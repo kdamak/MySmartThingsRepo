@@ -177,12 +177,12 @@ def off() {
 
 def poll() {
 	log.debug "Executing Poll for garage car door"
-/*	delayBetween([
+	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
         zwave.basicV1.basicGet().format(),
 		zwave.alarmV1.alarmGet().format() 
-	],100)*/
+	],100)
 }
 
 def refresh() {
