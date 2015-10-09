@@ -8,14 +8,16 @@
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v3", namespace: "jscgs350", author: "jscgs350") {
-		capability "Alarm"
         capability "Momentary"
 		capability "Polling"
         capability "Refresh"
         capability "Switch"
         capability "Contact Sensor"
         capability "Configuration"
-        capability "Garage Door Control"
+		capability "Actuator"
+		capability "Door Control"
+		capability "Garage Door Control"
+        capability "garageDoorControl"
         attribute "power", "string"
         attribute "contactState", "string"
         attribute "powerState", "string"
@@ -45,7 +47,7 @@ metadata {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
         valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
-			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
+			state "statusText", label:'${currentValue}'
 		}
         main (["contact"])
         details(["contact", "refresh", "configure"])
@@ -72,7 +74,7 @@ def parse(String description) {
     def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
     statusTextmsg = "Garage door is ${device.currentState('contactState').value}.\nLast refreshed at "+timeString+"."
     sendEvent("name":"statusText", "value":statusTextmsg)
-    
+//    log.debug "Time to do something about this garage door"
     return result
 }
 
@@ -144,17 +146,33 @@ def push() {
 }
 
 def open() {
-	log.debug "Executing OPEN command for garage car door per user request"
-	def cmds = [
-		zwave.basicV1.basicSet(value: 0xFF).format(),
-	]
+	if (device.currentValue("contact") != "open") {
+		log.debug "Sending ACTUATE event to open door"
+		def cmds = [zwave.basicV1.basicSet(value: 0xFF).format(),]
+	}
+	else {
+		log.debug "Not opening door since it is already open"
+	}
 }
 
 def close() {
-	log.debug "Executing CLOSE command for garage car door per user request"
-	def cmds = [
-		zwave.basicV1.basicSet(value: 0xFF).format(),
-	]
+	if (device.currentValue("contact") != "closed") {
+		log.debug "Sending ACTUATE event to close door"
+		def cmds = [zwave.basicV1.basicSet(value: 0xFF).format(),]
+	}
+	else {
+		log.debug "Not closing door since it is already closed"
+	}
+}
+
+def on() {
+	log.debug "on() was called treat this like Open"
+	open()
+}
+
+def off() {
+	log.debug "off() was called treat like Close"
+	close()
 }
 
 def poll() {
