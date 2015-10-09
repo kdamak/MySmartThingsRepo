@@ -57,7 +57,7 @@ metadata {
 def parse(String description) {
     def result = null
     def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1, 0x20: 1, 0x84: 1])
-	log.debug cmd
+//	log.debug cmd
     if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
         sendEvent(name: "power", value: "dead")
         sendEvent(name: "powerState", value: "NO POWER!")
@@ -72,7 +72,7 @@ def parse(String description) {
     
     def statusTextmsg = ""
     def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
-    statusTextmsg = "Garage door is ${device.currentState('contactState').value}.\nLast refreshed at "+timeString+"."
+    statusTextmsg = "Garage door is ${device.currentState('contactState').value}.\nLast refreshed at "+timeString+".\nDevice has ${device.currentState('powerState').value}"
     sendEvent("name":"statusText", "value":statusTextmsg)
 //    log.debug "Time to do something about this garage door"
     return result
