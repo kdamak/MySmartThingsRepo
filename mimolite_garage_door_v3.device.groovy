@@ -12,6 +12,7 @@ metadata {
 		capability "Polling"
         capability "Refresh"
         capability "Switch"
+        capability "Sensor"
         capability "Contact Sensor"
         capability "Configuration"
 		capability "Actuator"
@@ -81,10 +82,12 @@ def parse(String description) {
 def sensorValueEvent(Short value) {
     if (value) {
     	log.debug "$device.displayName is now open"
+        sendEvent(name: "switch", value: "on")
 		sendEvent(name: "contact", value: "open", descriptionText: "$device.displayName is open")
         sendEvent(name: "contactState", value: "OPEN (tap to close)")
     } else {
         log.debug "$device.displayName is now closed"
+        sendEvent(name: "switch", value: "off")
         sendEvent(name: "contact", value: "closed", descriptionText: "$device.displayName is closed")
         sendEvent(name: "contactState", value: "CLOSED (tap to open)")
     }
@@ -148,7 +151,7 @@ def push() {
 def open() {
 	if (device.currentValue("contact") != "open") {
 		log.debug "Sending ACTUATE event to open door"
-		def cmds = [zwave.basicV1.basicSet(value: 0xFF).format(),]
+		push()
 	}
 	else {
 		log.debug "Not opening door since it is already open"
@@ -158,7 +161,7 @@ def open() {
 def close() {
 	if (device.currentValue("contact") != "closed") {
 		log.debug "Sending ACTUATE event to close door"
-		def cmds = [zwave.basicV1.basicSet(value: 0xFF).format(),]
+		push()
 	}
 	else {
 		log.debug "Not closing door since it is already closed"
