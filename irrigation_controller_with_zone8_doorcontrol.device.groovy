@@ -72,7 +72,7 @@ metadata {
         command "expedite"
         command "onHold"
         command "actuateOpener"
-		attribute "effect", "string"
+	attribute "effect", "string"
     }
 
     simulator {
@@ -140,7 +140,7 @@ metadata {
         }
 
 /*
-		standardTile("zoneEightTile", "device.zoneEight", width: 1, height: 1, canChangeIcon: true, canChangeBackground: true) {
+	standardTile("zoneEightTile", "device.zoneEight", width: 1, height: 1, canChangeIcon: true, canChangeBackground: true) {
             state "off8", label: 'Eight', action: "RelayOn8", icon: "st.Outdoor.outdoor12", backgroundColor: "#ffffff", nextState: "sending8"
             state "sending8", label: 'sending', action: "RelayOff8", icon: "st.Health & Wellness.health7", backgroundColor: "#cccccc"
             state "q8", label: 'Eight', action: "RelayOff8",icon: "st.Outdoor.outdoor12", backgroundColor: "#c0a353", nextState: "sending8"
@@ -157,8 +157,8 @@ metadata {
 
         standardTile("pumpTile", "device.pump", width: 1, height: 1, canChangeIcon: true, canChangeBackground: true) {
             state "noPump", label: 'Pump', action: "enablePump", icon: "st.custom.buttons.subtract-icon", backgroundColor: "#ffffff",nextState: "enablingPump"
-         	state "offPump", label: 'Pump', action: "onPump", icon: "st.valves.water.closed", backgroundColor: "#ffffff", nextState: "sendingPump"
-           	state "enablingPump", label: 'sending', action: "disablePump", icon: "st.Health & Wellness.health7", backgroundColor: "#cccccc"
+            state "offPump", label: 'Pump', action: "onPump", icon: "st.valves.water.closed", backgroundColor: "#ffffff", nextState: "sendingPump"
+            state "enablingPump", label: 'sending', action: "disablePump", icon: "st.Health & Wellness.health7", backgroundColor: "#cccccc"
             state "disablingPump", label: 'sending', action: "disablePump", icon: "st.Health & Wellness.health7", backgroundColor: "#cccccc"
             state "onPump", label: 'Pump', action: "offPump",icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState: "sendingPump"
             state "sendingPump", label: 'sending', action: "offPump", icon: "st.Health & Wellness.health7", backgroundColor: "#cccccc"
@@ -375,10 +375,10 @@ def RelayOff8() {
 // This is where we expect to send an on and then off command to the Arduino to simulate a momentary switch.  There's a 2 second delay between on and off (2000ms)
 def actuateOpener() {
     log.info "Executing Actuate command for a garage door controller assigned to Zone 8..."
-	def cmd = delayBetween([
-		zigbee.smartShield(text: "on,8").format(),
+    def cmd = delayBetween([
+	zigbee.smartShield(text: "on,8").format(),
         zigbee.smartShield(text: "off,8").format(),
-	],2000)    
+    ],2000)    
 }
 
 def on() {
