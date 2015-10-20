@@ -36,7 +36,7 @@ metadata {
 // Watts row
 
         valueTile("powerDisp", "device.powerDisp", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
-            state ("default", label:'Now ${currentValue}')
+            state ("default", icon: "st.secondary.activity", label:'Now ${currentValue}')
         }
         
         valueTile("powerOne", "device.powerOne", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
@@ -64,7 +64,7 @@ metadata {
 			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
 		main "powerDisp"
-		details(["switch","powerDisp","powerTwo","refresh","reset","configure"])
+		details(["switch","refresh","reset","configure"])
 	}
 }
 
@@ -78,7 +78,7 @@ def parse(String description) {
     def statusTextmsg = ""
     statusTextmsg = "Switch is currently using ${device.currentState('powerDisp').value}, and hit a maximum of ${device.currentState('powerTwo').value}"
     sendEvent("name":"statusText", "value":statusTextmsg)
-    log.debug statusTextmsg
+//    log.debug statusTextmsg
 
 	return result
 }
@@ -87,7 +87,7 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
     log.debug "zwaveEvent received ${cmd}"
     def dispValue
     def newValue
-    def timeString = new Date().format("yyyy-mm-dd h:mm a", location.timeZone)
+    def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
 	if (cmd.scale == 0) {
 		[name: "energy", value: cmd.scaledMeterValue, unit: "kWh"]
 	} else if (cmd.scale == 1) {
@@ -100,7 +100,7 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
                 sendEvent(name: "powerDisp", value: dispValue as String, unit: "")
                 
                 if (newValue < state.powerLow) {
-                    dispValue = newValue+"w" //+timeString
+                    dispValue = newValue+"w"+"on "+timeString
                     sendEvent(name: "powerOne", value: dispValue as String, unit: "")
                     state.powerLow = newValue
                 }
@@ -182,11 +182,14 @@ def reset() {
 def configure() {
     log.debug "${device.name} configure"
 	delayBetween([
-		zwave.configurationV1.configurationSet(parameterNumber: 101, size: 4, scaledConfigurationValue: 4).format(),   // combined power in watts
-		zwave.configurationV1.configurationSet(parameterNumber: 111, size: 4, scaledConfigurationValue: 30).format(), // every 30 seconds
-		zwave.configurationV1.configurationSet(parameterNumber: 102, size: 4, scaledConfigurationValue: 8).format(),   // combined energy in kWh
-		zwave.configurationV1.configurationSet(parameterNumber: 112, size: 4, scaledConfigurationValue: 150).format(), // every 2.5 minutes
-		zwave.configurationV1.configurationSet(parameterNumber: 103, size: 4, scaledConfigurationValue: 0).format(),    // no third report
-		zwave.configurationV1.configurationSet(parameterNumber: 113, size: 4, scaledConfigurationValue: 300).format() // every 5 min
+    zwave.configurationV1.configurationSet(parameterNumber: 3, size: 1, scaledConfigurationValue: 0).format(),      // Disable selective reporting, so always update based on schedule below <set to 1 to reduce network traffic>
+    zwave.configurationV1.configurationSet(parameterNumber: 4, size: 2, scaledConfigurationValue: 50).format(),     // (DISABLED by first option) Don't send unless watts have changed by 50 <default>
+    zwave.configurationV1.configurationSet(parameterNumber: 8, size: 1, scaledConfigurationValue: 10).format(),     // (DISABLED by first option) Or by 10% <default>
+    zwave.configurationV1.configurationSet(parameterNumber: 101, size: 4, scaledConfigurationValue: 4).format(),   // Combined energy in Watts
+    zwave.configurationV1.configurationSet(parameterNumber: 111, size: 4, scaledConfigurationValue: 15).format(),   // Every 15 Seconds (for Watts)
+    zwave.configurationV1.configurationSet(parameterNumber: 102, size: 4, scaledConfigurationValue: 8).format(),    // Combined energy in kWh
+    zwave.configurationV1.configurationSet(parameterNumber: 112, size: 4, scaledConfigurationValue: 60).format(),  // every 60 seconds (for kWh)
+    zwave.configurationV1.configurationSet(parameterNumber: 103, size: 4, scaledConfigurationValue: 0).format(),    // Disable report 3
+    zwave.configurationV1.configurationSet(parameterNumber: 113, size: 4, scaledConfigurationValue: 0).format()   // Disable report 3
 	])
 }
