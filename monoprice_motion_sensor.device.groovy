@@ -24,7 +24,7 @@ preferences {
 }
 
 metadata {
-    definition (name:"My Monoprice Motion Sensor v2", namespace:"jscgs350", author: "several") {
+    definition (name:"My Monoprice Motion Sensor v2", namespace:"jscgs350", author: "florianz") {
         capability "Battery"
         capability "Motion Sensor"
         capability "Temperature Measurement"
@@ -76,10 +76,12 @@ def parse(String description) {
         }
     }
     
-//  log.debug "Applying preferences for Monoprice Motion Sensor: ${inactivityTimeout}"
-//    zwave.configurationV1.configurationSet(configurationValue: [inactivityTimeout], parameterNumber: 1, size: 1).format()
-//  log.debug "zwaveEvent ConfigurationReport: '${cmd}'"
-
+    if (inactivityTimeout) {
+		log.debug "Applying preferences for Monoprice Motion Sensor: ${inactivityTimeout}"
+	    zwave.configurationV1.configurationSet(configurationValue: [inactivityTimeout], parameterNumber: 1, size: 1).format()
+		log.debug "zwaveEvent ConfigurationReport: '${cmd}'"
+	}
+    
     return result
 
 }
