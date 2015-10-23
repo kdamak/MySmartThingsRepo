@@ -138,15 +138,17 @@ metadata {
             state ("default", label:'${currentValue}', icon:"st.Appliances.appliances11")
         }
 		standardTile("refresh", "device.thermostatMode", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
-			state "default", action:"poll", icon:"st.secondary.refresh"
+			state "default", action:"polling.poll", icon:"st.secondary.refresh"
 		}
 		standardTile("configure", "device.configure", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
-			state "configure", label:'  ', action:"configuration.configure", icon:"st.secondary.configure"
+			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
 
         valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
 			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
+
+// , "heatLevelUp", "coolLevelUp", "heatingSetpoint", "coolingSetpoint", "heatLevelDown", "coolLevelDown"
 
 		main "temperature"
         details(["temperature", "heatingSetpoint", "heatLevelUp", "coolLevelUp", "coolingSetpoint", "heatLevelDown", "coolLevelDown", "heatSliderControl", "coolSliderControl", "fanon", "fanauto", "fancir", "modeoff", "modeheat", "modecool", "modeauto", "refresh", "configure"])
