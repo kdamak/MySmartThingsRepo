@@ -79,11 +79,11 @@ metadata {
         }
 
 //Heating Set Point Controls
-        standardTile("heatLevelUp", "device.heatingSetpoint", width: 1, height: 1, inactiveLabel: false) {
-            state "heatLevelUp", label:'', action:"heatLevelUp", icon:"st.thermostat.thermostat-up", backgroundColor:"#d04e00"
+        standardTile("heatLevelUp", "device.heatingSetpoint", width: 1, height: 1, inactiveLabel: false, decoration: "flat") {
+            state "heatLevelUp", label:'Heat', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"//, backgroundColor:"#d04e00"
         }
-		standardTile("heatLevelDown", "device.heatingSetpoint", width: 1, height: 1, inactiveLabel: false) {
-            state "heatLevelDown", label:'', action:"heatLevelDown", icon:"st.thermostat.thermostat-down", backgroundColor:"#d04e00"
+		standardTile("heatLevelDown", "device.heatingSetpoint", width: 1, height: 1, inactiveLabel: false, decoration: "flat") {
+            state "heatLevelDown", label:'Heat', action:"heatLevelDown", icon:"st.thermostat.thermostat-down"//, backgroundColor:"#d04e00"
         }
         valueTile("heatingSetpoint", "device.heatingSetpoint", width: 2, height: 2, inactiveLabel: false) {
 			state "heat", label:'${currentValue}°', unit:"F",
@@ -101,11 +101,11 @@ metadata {
 		}
 
 //Cooling Set Point Controls
-        standardTile("coolLevelUp", "device.coolingSetpoint", width: 1, height: 1, inactiveLabel: false) {
-            state "coolLevelUp", label:'', action:"coolLevelUp", icon:"st.thermostat.thermostat-up", backgroundColor: "#1e9cbb"
+        standardTile("coolLevelUp", "device.coolingSetpoint", width: 1, height: 1, inactiveLabel: false, decoration: "flat") {
+            state "coolLevelUp", label:'Cool', action:"coolLevelUp", icon:"st.thermostat.thermostat-up"//, backgroundColor: "#1e9cbb"
         }
-		standardTile("coolLevelDown", "device.coolingSetpoint", width: 1, height: 1, inactiveLabel: false) {
-            state "coolLevelDown", label:'', action:"coolLevelDown", icon:"st.thermostat.thermostat-down", backgroundColor: "#1e9cbb"
+		standardTile("coolLevelDown", "device.coolingSetpoint", width: 1, height: 1, inactiveLabel: false, decoration: "flat") {
+            state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"//, backgroundColor: "#1e9cbb"
         }
 		valueTile("coolingSetpoint", "device.coolingSetpoint", width: 2, height: 2, inactiveLabel: false) {
 			state "cool", label:'${currentValue}°', unit:"F",
