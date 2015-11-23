@@ -7,7 +7,7 @@ metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My Zigbee Valve", namespace: "jscgs350", author: "SmartThings") {
 		capability "Battery"
-        capability "Alarm"
+        	capability "Alarm"
 		capability "Configuration"
 		capability "Refresh"
 		capability "Switch"
