@@ -3,7 +3,7 @@
  * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
  *  Author: Many ST community members
- *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04, 2015-10-12
+ *  Date: 2013-03-07,2014-02-03, 2014-03-07, 2015-01-04
  */
 metadata {
 	// Automatically generated. Make future change here.
@@ -94,7 +94,7 @@ def sensorValueEvent(Short value) {
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
-	[name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
+//	[name: "switch", value: cmd.value ? "on" : "off", type: "physical"]
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd)
@@ -103,7 +103,7 @@ def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd) {
-	[name: "switch", value: cmd.value ? "on" : "off", type: "digital"]
+//	[name: "switch", value: cmd.value ? "on" : "off", type: "digital"]
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.sensorbinaryv1.SensorBinaryReport cmd)
