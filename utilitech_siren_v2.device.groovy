@@ -13,7 +13,7 @@ metadata {
         capability "Refresh"
         capability "Sensor"
 		capability "Switch"
-
+		attribute "alarmState", "string"
 
 		fingerprint inClusters: "0x20,0x25,0x86,0x80,0x85,0x72,0x71"
 	}
@@ -54,9 +54,9 @@ def parse(String description) {
 	}
     
     def statusTextmsg = ""
-    statusTextmsg = "Siren is ${device.currentState('alarm').value} (tap to toggle on/off)"
+    statusTextmsg = "Siren is ${device.currentState('alarmState').value} (tap to toggle on/off)."
     sendEvent("name":"statusText", "value":statusTextmsg)
-    log.debug statusTextmsg
+//    log.debug statusTextmsg
 
 	log.debug "Parse returned ${result?.descriptionText}"
 	return result
@@ -138,22 +138,25 @@ def createEvents(physicalgraph.zwave.commands.basicv1.BasicReport cmd)
 	def alarmValue
 	if (cmd.value == 0) {
 		alarmValue = "off"
+        sendEvent(name: "alarmState", value: "OFF, waiting for events")
 	}
 	else if (cmd.value <= 33) {
 		alarmValue = "strobe"
+        sendEvent(name: "alarmState", value: "ON - strobe only!")
 	}
 	else if (cmd.value <= 66) {
 		alarmValue = "siren"
+        sendEvent(name: "alarmState", value: "ON - siren only!")
 	}
 	else {
 		alarmValue = "both"
+        sendEvent(name: "alarmState", value: "ON - strobe and siren!")
 	}
 	[
 		createEvent([name: "switch", value: switchValue, type: "digital", displayed: false]),
 		createEvent([name: "alarm", value: alarmValue, type: "digital"])
 	]
 }
-
 
 def createEvents(physicalgraph.zwave.Command cmd) {
 	log.warn "UNEXPECTED COMMAND: $cmd"
