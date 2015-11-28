@@ -73,7 +73,7 @@ def parse(String description) {
     
     def statusTextmsg = ""
     def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
-    statusTextmsg = "Garage door is ${device.currentState('contactState').value}.\nLast refreshed at "+timeString+".\nDevice has ${device.currentState('powerState').value}"
+    statusTextmsg = "Garage door is ${device.currentState('contactState').value}.\nLast refreshed at "+timeString+"."
     sendEvent("name":"statusText", "value":statusTextmsg)
 //    log.debug "Time to do something about this garage door"
     return result
