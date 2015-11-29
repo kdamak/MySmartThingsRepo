@@ -18,7 +18,6 @@ metadata {
 		capability "Actuator"
 		capability "Door Control"
 		capability "Garage Door Control"
-        capability "garageDoorControl"
         attribute "power", "string"
         attribute "contactState", "string"
         attribute "powerState", "string"
