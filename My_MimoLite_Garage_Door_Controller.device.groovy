@@ -65,14 +65,14 @@ metadata {
 			state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#ffa81e"
 			state "closed", label: '${name}', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
 		}
-        standardTile("refresh", "device.switch", width: 2, height: 1, inactiveLabel: false, decoration: "flat") {
+        standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-        standardTile("powered", "device.powered", width: 2, height: 1, inactiveLabel: false) {
+        standardTile("powered", "device.powered", width: 2, height: 2, inactiveLabel: false) {
 			state "powerOn", label: "Power On", icon: "st.switches.switch.on", backgroundColor: "#79b821"
 			state "powerOff", label: "Power Off", icon: "st.switches.switch.off", backgroundColor: "#ffa81e"
 		}
-		standardTile("configure", "device.configure", width: 2, height: 1, inactiveLabel: false, decoration: "flat") {
+		standardTile("configure", "device.configure", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
 		main (["switch", "contact"])
