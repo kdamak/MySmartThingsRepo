@@ -202,7 +202,7 @@ def reset() {
 	state.powerLow = 99999
 
 	def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
-    sendEvent(name: "energyOne", value: "kWh/Cost Reset On: "+timeString, unit: "")       
+    sendEvent(name: "energyOne", value: "Energy Data (kWh/Cost) Reset On:\n"+timeString, unit: "")       
     sendEvent(name: "energyDisp", value: "", unit: "")
     sendEvent(name: "energyTwo", value: "Cost\n--", unit: "")
 
@@ -221,7 +221,7 @@ def resetmaxmin() {
     state.powerLow = 99999
     
 	def timeString = new Date().format("yyyy-MM-dd h:mm a", location.timeZone)
-    sendEvent(name: "energyOne", value: "WATTS Reset On: "+timeString, unit: "")
+    sendEvent(name: "energyOne", value: "Watts Data (min/max) Reset On:\n"+timeString, unit: "")
     sendEvent(name: "powerOne", value: "", unit: "")    
     sendEvent(name: "powerTwo", value: "", unit: "")    
 
