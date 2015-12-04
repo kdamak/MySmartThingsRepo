@@ -110,7 +110,7 @@ def parse(String description) {
     }
 //    if (result) log.debug "Parse returned ${result}"
     def statusTextmsg = ""
-    statusTextmsg = "Home is currently using ${device.currentState('powerDisp').value}.\nMin was ${device.currentState('powerOne').value}.\nMax was ${device.currentState('powerTwo').value}."
+    statusTextmsg = "Home is currently using ${device.currentState('powerDisp')?.value}.\nMin was ${device.currentState('powerOne')?.value}.\nMax was ${device.currentState('powerTwo')?.value}."
     sendEvent("name":"statusText", "value":statusTextmsg)
 //    log.debug statusTextmsg
     return result
