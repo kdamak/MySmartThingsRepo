@@ -76,7 +76,7 @@ def parse(String description) {
 	}
         
     def statusTextmsg = ""
-    statusTextmsg = "Switch is currently using ${device.currentState('powerDisp').value}, and hit a maximum of ${device.currentState('powerTwo').value}"
+    statusTextmsg = "Switch is currently using ${device.currentState('powerDisp')?.value}, and hit a maximum of ${device.currentState('powerTwo')?.value}"
     sendEvent("name":"statusText", "value":statusTextmsg)
 //    log.debug statusTextmsg
 
@@ -182,9 +182,9 @@ def reset() {
 def configure() {
     log.debug "${device.name} configure"
 	delayBetween([
-    zwave.configurationV1.configurationSet(parameterNumber: 3, size: 1, scaledConfigurationValue: 0).format(),      // Disable selective reporting, so always update based on schedule below <set to 1 to reduce network traffic>
-    zwave.configurationV1.configurationSet(parameterNumber: 4, size: 2, scaledConfigurationValue: 50).format(),     // (DISABLED by first option) Don't send unless watts have changed by 50 <default>
-    zwave.configurationV1.configurationSet(parameterNumber: 8, size: 1, scaledConfigurationValue: 10).format(),     // (DISABLED by first option) Or by 10% <default>
+    zwave.configurationV1.configurationSet(parameterNumber: 3, size: 1, scaledConfigurationValue: 1).format(),      // Disable selective reporting, so always update based on schedule below <set to 1 to reduce network traffic>
+    zwave.configurationV1.configurationSet(parameterNumber: 4, size: 2, scaledConfigurationValue: 2).format(),     // (DISABLED by first option) Don't send unless watts have changed by 50 <default>
+    zwave.configurationV1.configurationSet(parameterNumber: 8, size: 1, scaledConfigurationValue: 1).format(),     // (DISABLED by first option) Or by 10% <default>
     zwave.configurationV1.configurationSet(parameterNumber: 101, size: 4, scaledConfigurationValue: 4).format(),   // Combined energy in Watts
     zwave.configurationV1.configurationSet(parameterNumber: 111, size: 4, scaledConfigurationValue: 15).format(),   // Every 15 Seconds (for Watts)
     zwave.configurationV1.configurationSet(parameterNumber: 102, size: 4, scaledConfigurationValue: 8).format(),    // Combined energy in kWh
