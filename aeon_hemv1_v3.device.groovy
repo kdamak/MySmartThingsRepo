@@ -97,7 +97,7 @@ metadata {
         }
 
         preferences {
-            input "kWhCost", "string", title: "\$/kWh (0.16)", defaultValue: "0.16" as String
+            input "kWhCost", "string", title: "\$/kWh (0.16)", defaultValue: "0.16" as String, displayDuringSetup: true
         }
 }
 
