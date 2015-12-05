@@ -1,37 +1,14 @@
 /**
- *  MimoLite Garage Door Controller
+ * MIMOlite device type for garage door button, including power failure indicator.  Be sure mimolite has jumper removed before
+ * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
- *  Original Copyright 2014 Todd Wackford
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
- *  Note: This device type is based on the work of Jit Jack (cesaldar) as posted on the SmartThings Community website.
- *
- *  This device type file will configure a Fortrezz MimoLite Wireless Interface/Bridge Module as a Garage Door 
- *  Controller. The Garage Door must be physically configured per the following diagram: 
- *    "http://www.fortrezz.com/index.php/component/jdownloads/finish/4/17?Itemid=0"
- *  for all functionality to work correctly.
- *
- *  This device type will also set the atttibute "powered" to "powerOn" or "powerOff" accordingly. This uses
- *  the alarm capability of the MimoLite and the status will be displayed to the user on a secondary tile. User
- *  can subscribe to the status of this atttribute to be notified when power drops out.
- *
- *  This device type implements a "Configure" action tile which will set the momentary switch timeout to 25ms and
- *  turn on the powerout alarm.
- *
- *  
+ *  Author: Many ST community members
  */
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v4", namespace: "jscgs350", author: "jscgs350") {
 		capability "Configuration"
+        capability "Momentary"        
 		capability "Polling"
 		capability "Switch"
 		capability "Refresh"
@@ -40,9 +17,11 @@ metadata {
 		capability "Actuator"
 		capability "Door Control"
 		capability "Garage Door Control"
-//        capability "garageDoorControl"
+        capability "garageDoorControl"
         
 		attribute "powered", "string"
+        attribute "contactState", "string"
+        attribute "powerState", "string"        
         
 		command "on"
 		command "off"
@@ -54,12 +33,11 @@ metadata {
 	tiles(scale: 2) {
 		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-            	attributeState "doorClosed", label: "Closed", action: "on", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821"
-            	attributeState "doorOpen", label: "Open", action: "on", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e"
-//            	attributeState "doorOpening", label: "Opening", action: "on", icon: "st.doors.garage.garage-opening", backgroundColor: "#ffa81e"
-//            	attributeState "doorClosing", label: "Closing", action: "on", icon: "st.doors.garage.garage-closing", backgroundColor: "#ffa81e"
-            	attributeState "on", label: "Actuate", action: "on", icon: "st.doors.garage.garage-closed", backgroundColor: "#53a7c0"
-//				attributeState "off", label: '${name}', action: "on", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
+            	attributeState "doorClosed", label: "Closed", action: "on", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821", nextState:"openingdoor"
+            	attributeState "doorOpen", label: "Open", action: "on", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e", nextState:"closingdoor"
+                attributeState "closingdoor", label:'Closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffd700"
+                attributeState "openingdoor", label:'Opening', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffd700"
+//            	attributeState "on", label: "Actuate", action: "on", icon: "st.doors.garage.garage-closed", backgroundColor: "#53a7c0"
 			}
 		}
         standardTile("contact", "device.contact", inactiveLabel: false) {
@@ -146,16 +124,15 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 	[:]
 }
 
-def configure() {
-	log.debug "Configuring...." //setting up to monitor power alarm and actuator duration
-	delayBetween([
-		zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:[zwaveHubNodeId]).format(),
-        zwave.configurationV1.configurationSet(configurationValue: [25], parameterNumber: 11, size: 1).format(),
-        zwave.configurationV1.configurationGet(parameterNumber: 11).format()
-	])
+def on() {
+	push()
 }
 
-def on() {
+def off() {
+	push()
+}
+
+def push() {
 	delayBetween([
 		zwave.basicV1.basicSet(value: 0xFF).format(),
 		zwave.switchBinaryV1.switchBinaryGet().format(),
@@ -165,32 +142,25 @@ def on() {
 	],100)
 }
 
-def off() {
-	delayBetween([
-		zwave.basicV1.basicSet(value: 0x00).format(),
-		zwave.switchBinaryV1.switchBinaryGet().format(),
-		zwave.sensorBinaryV1.sensorBinaryGet().format(),
-        zwave.basicV1.basicGet().format(),
-		zwave.alarmV1.alarmGet().format() 
-	],100)
-}
-
 def poll() {
-	log.debug "Executing Poll for garage car door"
-	delayBetween([
-		zwave.switchBinaryV1.switchBinaryGet().format(),
-		zwave.sensorBinaryV1.sensorBinaryGet().format(),
-        zwave.basicV1.basicGet().format(),
-		zwave.alarmV1.alarmGet().format() 
-	],100)
+	refresh()
 }
 
 def refresh() {
-	log.debug "Executing Refresh for garage car door per user request"
+	log.debug "Executing Refresh/Poll for garage car door per user request"
 	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
         zwave.basicV1.basicGet().format(),
 		zwave.alarmV1.alarmGet().format() 
 	],100)
+}
+
+def configure() {
+	log.debug "Configuring...." //setting up to monitor power alarm and actuator duration
+	delayBetween([
+		zwave.associationV1.associationSet(groupingIdentifier:3, nodeId:[zwaveHubNodeId]).format(),
+        zwave.configurationV1.configurationSet(configurationValue: [25], parameterNumber: 11, size: 1).format(),
+        zwave.configurationV1.configurationGet(parameterNumber: 11).format()
+	])
 }
