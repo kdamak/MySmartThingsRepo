@@ -138,19 +138,19 @@ def createEvents(physicalgraph.zwave.commands.basicv1.BasicReport cmd)
 	def alarmValue
 	if (cmd.value == 0) {
 		alarmValue = "off"
-        sendEvent(name: "alarmState", value: "OFF, waiting for events")
+        sendEvent(name: "alarmState", value: "waiting for events")
 	}
 	else if (cmd.value <= 33) {
 		alarmValue = "strobe"
-        sendEvent(name: "alarmState", value: "ON - strobe only!")
+        sendEvent(name: "alarmState", value: "ACTIVE - strobe only!")
 	}
 	else if (cmd.value <= 66) {
 		alarmValue = "siren"
-        sendEvent(name: "alarmState", value: "ON - siren only!")
+        sendEvent(name: "alarmState", value: "ACTIVE - siren only!")
 	}
 	else {
 		alarmValue = "both"
-        sendEvent(name: "alarmState", value: "ON - strobe and siren!")
+        sendEvent(name: "alarmState", value: "ACTIVE - strobe and siren!")
 	}
 	[
 		createEvent([name: "switch", value: switchValue, type: "digital", displayed: false]),
