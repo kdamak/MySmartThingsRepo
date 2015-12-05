@@ -2,24 +2,23 @@
  * MIMOlite device type for garage door button, including power failure indicator.  Be sure mimolite has jumper removed before
  * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
- *  Author: Many ST community members
+ *  Author: Many ST community members.  This is also based of the latest ST device type.
  */
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v4", namespace: "jscgs350", author: "jscgs350") {
-		capability "Configuration"
-        capability "Momentary"        
+        capability "Momentary"
 		capability "Polling"
-		capability "Switch"
-		capability "Refresh"
-        capability "Sensor"        
-		capability "Contact Sensor"
+        capability "Refresh"
+        capability "Switch"
+        capability "Sensor"
+        capability "Contact Sensor"
+        capability "Configuration"
 		capability "Actuator"
 		capability "Door Control"
 		capability "Garage Door Control"
-        capability "garageDoorControl"
         
-		attribute "powered", "string"
+		attribute "power", "string"
         attribute "contactState", "string"
         attribute "powerState", "string"        
         
@@ -37,8 +36,10 @@ metadata {
             	attributeState "doorOpen", label: "Open", action: "on", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e", nextState:"closingdoor"
                 attributeState "closingdoor", label:'Closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffd700"
                 attributeState "openingdoor", label:'Opening', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffd700"
-//            	attributeState "on", label: "Actuate", action: "on", icon: "st.doors.garage.garage-closed", backgroundColor: "#53a7c0"
 			}
+            tileAttribute ("statusText", key: "SECONDARY_CONTROL") {
+           		attributeState "statusText", label:'${currentValue}'       		
+            }
 		}
         standardTile("contact", "device.contact", inactiveLabel: false) {
 			state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#ffa81e"
@@ -47,15 +48,18 @@ metadata {
         standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-        standardTile("powered", "device.powered", width: 2, height: 2, inactiveLabel: false) {
+        standardTile("power", "device.power", width: 2, height: 2, inactiveLabel: false) {
 			state "powerOn", label: "Power On", icon: "st.switches.switch.on", backgroundColor: "#79b821"
 			state "powerOff", label: "Power Off", icon: "st.switches.switch.off", backgroundColor: "#ffa81e"
 		}
 		standardTile("configure", "device.configure", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
+        valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
+			state "statusText", label:'${currentValue}'
+		}        
 		main (["switch", "contact"])
-		details(["switch", "powered", "refresh", "configure"])
+		details(["switch", "power", "refresh", "configure"])
     }
 }
 
@@ -69,15 +73,22 @@ log.debug "description is: ${description}"
     
     if (cmd.CMD == "7105") {				//Mimo sent a power loss report
     	log.debug "Device lost power"
-    	sendEvent(name: "powered", value: "powerOff", descriptionText: "$device.displayName lost power")
+    	sendEvent(name: "power", value: "powerOff", descriptionText: "$device.displayName lost power")
+        sendEvent(name: "powerState", value: "powerOff")
     } else {
-    	sendEvent(name: "powered", value: "powerOn", descriptionText: "$device.displayName regained power")
+    	sendEvent(name: "power", value: "powerOn", descriptionText: "$device.displayName regained power")
+        sendEvent(name: "powerState", value: "powerOn")
     }
     
 	if (cmd) {
 		result = createEvent(zwaveEvent(cmd))
 	}
 	log.debug "Parse returned ${result?.descriptionText}"
+    
+    def statusTextmsg = ""
+    def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
+    statusTextmsg = "Last refreshed at "+timeString+"."
+    sendEvent("name":"statusText", "value":statusTextmsg)
     
 	return result
 }
@@ -86,9 +97,11 @@ def sensorValueEvent(Short value) {
 	if (value) {
         sendEvent(name: "contact", value: "open")
         sendEvent(name: "switch", value: "doorOpen")
+        sendEvent(name: "contactState", value: "OPEN (tap to close)")
 	} else {
         sendEvent(name: "contact", value: "closed")
         sendEvent(name: "switch", value: "doorClosed")
+        sendEvent(name: "contactState", value: "CLOSED (tap to open)")
 	}
 }
 
@@ -130,6 +143,26 @@ def on() {
 
 def off() {
 	push()
+}
+
+def open() {
+	if (device.currentValue("contact") != "open") {
+		log.debug "Sending ACTUATE event to open door"
+		push()
+	}
+	else {
+		log.debug "Not opening door since it is already open"
+	}
+}
+
+def close() {
+	if (device.currentValue("contact") != "closed") {
+		log.debug "Sending ACTUATE event to close door"
+		push()
+	}
+	else {
+		log.debug "Not closing door since it is already closed"
+	}
 }
 
 def push() {
