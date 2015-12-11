@@ -33,21 +33,21 @@ metadata {
             state "open", label: 'Open (On)', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
             state "closed", label: 'Closed (Off)', icon: "st.valves.water.closed", backgroundColor: "#ff0000"
         }
-        standardTile("power", "device.power", width: 3, height: 2, inactiveLabel: false) {
-        	state "dead", label: 'OFF', backgroundColor: "#ff0000", icon:"st.switches.switch.off"
-        	state "alive", label: 'ON', backgroundColor: "#79b821", icon:"st.switches.switch.on"
-        }
-        standardTile("refresh", "device.switch", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
+        standardTile("power", "device.power", width: 2, height: 2, inactiveLabel: false) {
+			state "powerOn", label: "Power On", icon: "st.switches.switch.on", backgroundColor: "#79b821"
+			state "powerOff", label: "Power Off", icon: "st.switches.switch.off", backgroundColor: "#ffa81e"
+		}
+        standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
         }
-		standardTile("configure", "device.configure", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
+		standardTile("configure", "device.configure", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
         valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
 			state "statusText", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
         main (["switch", "contact"])
-        details(["switch", "refresh", "configure"])
+        details(["switch", "power", "refresh", "configure"])
     }
 }
 
@@ -56,12 +56,13 @@ def parse(String description) {
     def result = null
     def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1, 0x20: 1, 0x84: 1])
 	log.debug cmd
-    if (cmd.CMD == "7105") {				//Mimo sent a power report lost power
-        sendEvent(name: "power", value: "dead")
-        sendEvent(name: "powerState", value: "NO POWER!")
+    if (cmd.CMD == "7105") {				//Mimo sent a power loss report
+    	log.debug "Device lost power"
+    	sendEvent(name: "power", value: "powerOff", descriptionText: "$device.displayName lost power")
+        sendEvent(name: "powerState", value: "powerOff")
     } else {
-    	sendEvent(name: "power", value: "alive")
-        sendEvent(name: "powerState", value: "electrical power.")
+    	sendEvent(name: "power", value: "powerOn", descriptionText: "$device.displayName regained power")
+        sendEvent(name: "powerState", value: "powerOn")
     }
 
 	if (cmd) {
@@ -109,27 +110,7 @@ def zwaveEvent(physicalgraph.zwave.commands.sensorbinaryv1.SensorBinaryReport cm
 
 def zwaveEvent(physicalgraph.zwave.commands.alarmv1.AlarmReport cmd)
 {
-	log.debug "zwaveEvent AlarmReport: '${cmd}'"
-
-    switch (cmd.alarmType) {
-        case 8:
-            def map = [ name: "power", isStateChange:true]
-            if (cmd.alarmLevel){
-                map.value="dead"
-                map.descriptionText = "${device.displayName} lost power"
-                sendEvent(name: "powerState", value: "NO POWER!")
-            }
-            else {
-                map.value="alive"
-                map.descriptionText = "${device.displayName} has power"
-                sendEvent(name: "powerState", value: "electrical power.")
-            }
-            sendEvent(map)
-        break;
-		default:
-        	[:]
-        break;
-    }
+    log.debug "We lost power" //we caught this up in the parse method. This method not used.
 }
 
 def zwaveEvent(physicalgraph.zwave.Command cmd) {
