@@ -20,8 +20,8 @@ metadata {
 	tiles(scale: 2) {
 		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true, decoration: "flat"){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-				attributeState "on", label: 'Valve Closed', action: "switch.on", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
-				attributeState "off", label: 'Valve Open', action: "switch.off", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
+				attributeState "on", label: 'Closed', action: "switch.off", icon: "st.valves.water.closed", backgroundColor: "#ff0000", nextState:"openingvalve"
+				attributeState "off", label: 'Open', action: "switch.on", icon: "st.valves.water.open", backgroundColor: "#53a7c0", nextState:"closingvalve"
 				attributeState "closingvalve", label:'Closing', icon:"st.valves.water.closed", backgroundColor:"#ffd700"
 				attributeState "openingvalve", label:'Opening', icon:"st.valves.water.open", backgroundColor:"#ffd700"
 			}
@@ -30,8 +30,8 @@ metadata {
             }
         }
         standardTile("contact", "device.contact", width: 3, height: 2, inactiveLabel: false) {
-            state "open", label: 'Open (On)', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
-            state "closed", label: 'Closed (Off)', icon: "st.valves.water.closed", backgroundColor: "#ff0000"
+            state "open", label: 'Open', icon: "st.valves.water.open", backgroundColor: "#53a7c0"
+            state "closed", label: 'Closed', icon: "st.valves.water.closed", backgroundColor: "#ff0000"
         }
         standardTile("power", "device.power", width: 2, height: 2, inactiveLabel: false) {
 			state "powerOn", label: "Power On", icon: "st.switches.switch.on", backgroundColor: "#79b821"
@@ -118,7 +118,7 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
     [:]
 }
 
-def off() {
+def on() {
 	log.debug "Closing Main Water Valve per user request"
 	delayBetween([
         zwave.basicV1.basicSet(value: 0xFF).format(),
@@ -126,18 +126,29 @@ def off() {
     ])
 }
 
+
+def off() {
+	log.debug "Opening Main Water Valve per user request"
+	delayBetween([
+        zwave.basicV1.basicSet(value: 0x00).format(),
+        zwave.switchBinaryV1.switchBinaryGet().format()
+    ])
+}
+
+// This is for when the the valve's ALARM capability is used
 def both() {
-	log.debug "Closing Main Water Valve due to an alarm condition"
+	log.debug "Closing Main Water Valve due to an ALARM capability condition"
 	delayBetween([
         zwave.basicV1.basicSet(value: 0xFF).format(),
         zwave.switchBinaryV1.switchBinaryGet().format()
     ])
 }
 
-def on() {
-	log.debug "Opening Main Water Valve per user request"
+// This is for when the the valve's VALVE capability is used
+def close() {
+	log.debug "Closing Main Water Valve due to a VALVE capability condition"
 	delayBetween([
-        zwave.basicV1.basicSet(value: 0x00).format(),
+        zwave.basicV1.basicSet(value: 0xFF).format(),
         zwave.switchBinaryV1.switchBinaryGet().format()
     ])
 }
