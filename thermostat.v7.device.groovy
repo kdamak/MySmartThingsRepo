@@ -15,6 +15,7 @@ metadata {
 		capability "Configuration"
 		capability "Polling"
 		capability "Sensor"
+        capability "Switch"
 
 		command "heatLevelUp"
 		command "heatLevelDown"
@@ -552,6 +553,7 @@ def modeemgcyheat() {
 	], standardDelay)
 //    poll()
 }
+
 def fanon() {
 	delayBetween([
 		zwave.thermostatFanModeV3.thermostatFanModeSet(fanMode: 1).format(),
@@ -571,6 +573,22 @@ def fanauto() {
 def fancir() {
 	delayBetween([
 		zwave.thermostatFanModeV3.thermostatFanModeSet(fanMode: 6).format(),
+		zwave.thermostatFanModeV3.thermostatFanModeGet().format()
+	], standardDelay)
+//    poll()
+}
+
+def on() {
+	delayBetween([
+		zwave.thermostatFanModeV3.thermostatFanModeSet(fanMode: 1).format(),
+		zwave.thermostatFanModeV3.thermostatFanModeGet().format()
+	], standardDelay)
+//    poll()
+}
+
+def off() {
+	delayBetween([
+		zwave.thermostatFanModeV3.thermostatFanModeSet(fanMode: 0).format(),
 		zwave.thermostatFanModeV3.thermostatFanModeGet().format()
 	], standardDelay)
 //    poll()
