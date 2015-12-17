@@ -2,12 +2,13 @@
  * MIMOlite device type for garage door button, including power failure indicator.  Be sure mimolite has jumper removed before
  * including the device to your hub, and tap Config to ensure power alarm is subscribed.
  *
- *  Author: Many ST community members.  This is also based of the latest ST device type.
+ *  Author: Many ST community members
  */
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My MIMOlite - Garage Car Door v4", namespace: "jscgs350", author: "jscgs350") {
         capability "Momentary"
+        capability "Relay Switch"
 		capability "Polling"
         capability "Refresh"
         capability "Switch"
@@ -64,10 +65,10 @@ metadata {
 }
 
 def parse(String description) {
-log.debug "description is: ${description}"
+	log.debug "description is: ${description}"
 
 	def result = null
-	def cmd = zwave.parse(description, [0x20: 1, 0x84: 1, 0x30: 1, 0x70: 1])
+    def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1, 0x20: 1, 0x84: 1])
     
     log.debug "command value is: $cmd.CMD"
     
