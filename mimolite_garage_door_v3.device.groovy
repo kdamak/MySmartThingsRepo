@@ -127,11 +127,11 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 }
 
 def on() {
-	push()
+	open()
 }
 
 def off() {
-	push()
+	close()
 }
 
 def open() {
