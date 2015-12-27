@@ -32,8 +32,8 @@ metadata {
 	tiles(scale: 2) {
 		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-            	attributeState "doorClosed", label: "Closed", action: "push", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821", nextState:"openingdoor"
-            	attributeState "doorOpen", label: "Open", action: "push", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e", nextState:"closingdoor"
+            	attributeState "doorClosed", label: "Closed", action: "on", icon: "st.doors.garage.garage-closed", backgroundColor: "#79b821", nextState:"openingdoor"
+            	attributeState "doorOpen", label: "Open", action: "off", icon: "st.doors.garage.garage-open", backgroundColor: "#ffa81e", nextState:"closingdoor"
                 attributeState "closingdoor", label:'Closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffd700"
                 attributeState "openingdoor", label:'Opening', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffd700"
 			}
@@ -70,7 +70,6 @@ def parse(String description) {
 	if (cmd) {
 		result = createEvent(zwaveEvent(cmd))
 	}
-	log.debug "Parse returned ${result?.descriptionText}"
     
     def statusTextmsg = ""
     def timeString = new Date().format("h:mma MM-dd-yyyy", location.timeZone)
@@ -84,11 +83,9 @@ def sensorValueEvent(Short value) {
 	if (value) {
         sendEvent(name: "contact", value: "open")
         sendEvent(name: "switch", value: "doorOpen")
-        sendEvent(name: "contactState", value: "OPEN (tap to close)")
 	} else {
         sendEvent(name: "contact", value: "closed")
         sendEvent(name: "switch", value: "doorClosed")
-        sendEvent(name: "contactState", value: "CLOSED (tap to open)")
 	}
 }
 
@@ -125,11 +122,23 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 }
 
 def on() {
-	push()
+	log.debug "Executing ACTUATE to open garage car door per user request"
+	delayBetween([
+		zwave.basicV1.basicSet(value: 0xFF).format(),
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+        zwave.basicV1.basicGet().format()
+	],100)
 }
 
 def off() {
-	push()
+	log.debug "Executing ACTUATE to close garage car door per user request"
+	delayBetween([
+		zwave.basicV1.basicSet(value: 0x00).format(),
+		zwave.switchBinaryV1.switchBinaryGet().format(),
+		zwave.sensorBinaryV1.sensorBinaryGet().format(),
+        zwave.basicV1.basicGet().format()
+	],100)
 }
 
 def open() {
@@ -158,8 +167,7 @@ def push() {
 		zwave.basicV1.basicSet(value: 0xFF).format(),
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
-        zwave.basicV1.basicGet().format(),
-		zwave.alarmV1.alarmGet().format() 
+        zwave.basicV1.basicGet().format()
 	],100)
 }
 
@@ -172,8 +180,7 @@ def refresh() {
 	delayBetween([
 		zwave.switchBinaryV1.switchBinaryGet().format(),
 		zwave.sensorBinaryV1.sensorBinaryGet().format(),
-        zwave.basicV1.basicGet().format(),
-		zwave.alarmV1.alarmGet().format() 
+        zwave.basicV1.basicGet().format()
 	],100)
 }
 
