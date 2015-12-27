@@ -1,0 +1,34 @@
+/**
+ *  Z-Wave Door/Window Sensor Reset - Force a closed state
+ */
+
+metadata {
+	definition (name: "My Z-Wave Door/Window Sensor Force Close Tool", namespace: "jscgs350", author: "SmartThings") {
+        capability "Refresh"
+        capability "Sensor"
+        capability "Contact Sensor"
+        capability "Configuration"
+	}
+
+	// UI tile definitions 
+	tiles(scale: 2) {
+        standardTile("contact", "device.contact", inactiveLabel: false, width: 2, height: 2) {
+			state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#ffa81e"
+			state "closed", label: '${name}', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+		}
+        standardTile("refresh", "device.switch", width: 4, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'FORCE CLOSE', action:"refresh.refresh", icon: "st.contact.contact.closed"
+		}
+		main (["contact"])
+		details(["contact", "refresh"])
+    }
+}
+
+def parse(String description) {
+	log.debug "description is: ${description}"
+}
+
+def refresh() {
+	log.debug "Open/Close sensor is stuck in an open state, so we'll force a closed state..."
+	sendEvent(name: "contact", value: "closed")
+}
