@@ -7,7 +7,6 @@ metadata {
         capability "Refresh"
         capability "Sensor"
         capability "Contact Sensor"
-        capability "Configuration"
 	}
 
 	// UI tile definitions 
