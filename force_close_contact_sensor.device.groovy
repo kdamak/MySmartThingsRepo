@@ -24,10 +24,6 @@ metadata {
     }
 }
 
-def parse(String description) {
-	log.debug "description is: ${description}"
-}
-
 def refresh() {
 	log.debug "Open/Close sensor is stuck in an open state, so we'll force a closed state..."
 	sendEvent(name: "contact", value: "closed")
