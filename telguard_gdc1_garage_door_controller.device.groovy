@@ -45,21 +45,17 @@ metadata {
 			state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#ffa81e"
 			state "closed", label: '${name}', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
 		}
-        standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+        standardTile("refresh", "device.switch", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-        standardTile("power", "device.power", width: 2, height: 2, inactiveLabel: false) {
-			state "powerOn", label: "Power On", icon: "st.switches.switch.on", backgroundColor: "#79b821"
-			state "powerOff", label: "Power Off", icon: "st.switches.switch.off", backgroundColor: "#ff0000"
-		}
-		standardTile("configure", "device.configure", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+		standardTile("configure", "device.configure", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
         valueTile("statusText", "statusText", inactiveLabel: false, width: 2, height: 2) {
 			state "statusText", label:'${currentValue}'
 		}        
 		main (["switch", "contact"])
-		details(["switch", "power", "refresh", "configure"])
+		details(["switch", "refresh", "configure"])
     }
 }
 
@@ -70,15 +66,6 @@ def parse(String description) {
     def cmd = zwave.parse(description, [0x72: 1, 0x86: 1, 0x71: 1, 0x30: 1, 0x31: 3, 0x35: 1, 0x70: 1, 0x85: 1, 0x25: 1, 0x03: 1, 0x20: 1, 0x84: 1])
     
     log.debug "command value is: $cmd.CMD"
-    
-    if (cmd.CMD == "7105") {				//Mimo sent a power loss report
-    	log.debug "Device lost power"
-    	sendEvent(name: "power", value: "powerOff", descriptionText: "$device.displayName lost power")
-        sendEvent(name: "powerState", value: "powerOff")
-    } else {
-    	sendEvent(name: "power", value: "powerOn", descriptionText: "$device.displayName regained power")
-        sendEvent(name: "powerState", value: "powerOn")
-    }
     
 	if (cmd) {
 		result = createEvent(zwaveEvent(cmd))
