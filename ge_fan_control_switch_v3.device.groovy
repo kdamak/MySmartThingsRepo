@@ -1,6 +1,6 @@
 metadata {
         
-        //A better functional Device Type for Z-Wave Smart Fan Control Switches, particularly the GE 12730 Z-Wave Smart Fan Control.
+        //A better functional Device Type for Z-Wave Smart Fan Control Switches, particularly the GE 12730.
 	
 	definition (name: "My GE Fan Control Switch v3", namespace: "jscgs350", author: "SmartThings") {
 		capability "Switch Level"
