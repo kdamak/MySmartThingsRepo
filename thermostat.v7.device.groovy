@@ -6,7 +6,7 @@
 metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "My Thermostat v7", namespace: "jscgs350", author: "jscgs350")
-    {
+    { 
 		capability "Refresh"
 		capability "Actuator"
 		capability "Temperature Measurement"
